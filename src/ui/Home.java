@@ -1,6 +1,6 @@
 package ui;
 
-import ui.treebrowse.TreeBrowse;
+import controller.treebrowse.TreeHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,19 +8,16 @@ import java.util.Objects;
 
 public class Home implements Runnable {
     private JPanel homePanel;
-    private JScrollPane scrollPane;
     private JTree tree;
-    private TreeBrowse treeBrowse;
     private JButton btBack;
     private JButton btForward;
     private JButton btUp;
     private JTable tableCurrentFolder;
     private JTextField tfAddress;
     private JButton btPicker;
-
+    private JScrollPane leftScrollPane;
 
     public Home() {
-        setUpUI();
     }
 
     public static void main(String[] args) {
@@ -29,6 +26,9 @@ public class Home implements Runnable {
 
     @Override
     public void run() {
+
+        setUpUI();
+
         JFrame frame = new JFrame("Home");
         frame.setContentPane(new Home().homePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -51,8 +51,7 @@ public class Home implements Runnable {
     private void createUIComponents() {
         // TODO: place custom component creation code here
         tree = new JTree();
-        treeBrowse = new TreeBrowse(tree);
-        scrollPane = new JScrollPane(tree);
+        TreeHelper treeHelper = new TreeHelper(tree);
+        treeHelper.initTree();
     }
-
 }

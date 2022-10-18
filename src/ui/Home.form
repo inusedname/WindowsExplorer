@@ -49,7 +49,7 @@
         <constraints border-constraint="Center"/>
         <properties/>
       </component>
-      <scrollpane id="edcee">
+      <scrollpane id="edcee" binding="leftScrollPane">
         <constraints border-constraint="West"/>
         <properties/>
         <border type="none"/>
