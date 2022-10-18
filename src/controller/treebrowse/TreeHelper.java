@@ -1,28 +1,32 @@
-package ui.treebrowse;
+package controller.treebrowse;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
 
-public class TreeBrowse {
-    private JTree tree;
+public class TreeHelper {
+    private final JTree tree;
     private DefaultMutableTreeNode root;
-    private DefaultTreeModel treeModel;
 
-    public TreeBrowse(JTree tree) {
+    public TreeHelper(JTree tree) {
         this.tree = tree;
+    }
+
+    public void initTree() {
         File[] rootDrive = File.listRoots();
         for (File sysDrive : rootDrive) {
             System.out.println("Drive : " + sysDrive);
         }
 
+        // TODO: Tree can show multiple Drives
         try {
             File fileRoot = new File(rootDrive[0].toURI());
             root = new DefaultMutableTreeNode(new FileNode(fileRoot));
-            treeModel = new DefaultTreeModel(root);
-            tree.setModel(treeModel);
+            tree.setModel(new DefaultTreeModel(root));
             tree.setShowsRootHandles(true);
+
+            // New node will be inserted into root
             CreateChildNodes ccn = new CreateChildNodes(fileRoot, root);
             new Thread(ccn).start();
         } catch (Exception e) {
@@ -30,19 +34,19 @@ public class TreeBrowse {
         }
     }
 
-    public class CreateChildNodes implements Runnable {
+    private final class CreateChildNodes implements Runnable {
 
-        private DefaultMutableTreeNode root;
-        private File fileRoot;
+        private final DefaultMutableTreeNode root;
+        private final File rootFile;
 
-        public CreateChildNodes(File fileRoot, DefaultMutableTreeNode root) {
-            this.fileRoot = fileRoot;
+        public CreateChildNodes(File rootFile, DefaultMutableTreeNode root) {
+            this.rootFile = rootFile;
             this.root = root;
         }
 
         @Override
         public void run() {
-            createChildren(fileRoot, root);
+            createChildren(rootFile, root);
         }
 
         private void createChildren(File fileRoot, DefaultMutableTreeNode node) {
@@ -60,8 +64,8 @@ public class TreeBrowse {
 
     }
 
-    public class FileNode {
-        private File file;
+    private final class FileNode {
+        private final File file;
 
         public FileNode(File file) {
             this.file = file;
