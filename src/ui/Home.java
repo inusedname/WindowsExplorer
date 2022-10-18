@@ -1,34 +1,44 @@
 package ui;
 
-import ui.popupmenu.FolderPopClickListener;
+import controller.treebrowse.TreeHelper;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class Home {
+public class Home implements Runnable {
     private JPanel homePanel;
-    private JTree treeBrowse;
+    private JTree tree;
     private JButton btBack;
     private JButton btForward;
     private JButton btUp;
     private JTable tableCurrentFolder;
     private JTextField tfAddress;
     private JButton btPicker;
+    private JScrollPane leftScrollPane;
 
     public Home() {
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Home());
+    }
+
+    @Override
+    public void run() {
+
         setUpUI();
+
+        JFrame frame = new JFrame("Home");
+        frame.setContentPane(new Home().homePanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private void setUpUI() {
         homePanel.setPreferredSize(new Dimension(1280, 720));
         setUpIcons();
-        setUpOnClick();
-    }
-
-    private void setUpOnClick() {
-        treeBrowse.addMouseListener(new FolderPopClickListener());
-        tableCurrentFolder.addMouseListener(new FolderPopClickListener());
     }
 
     private void setUpIcons() {
@@ -36,16 +46,12 @@ public class Home {
         btForward.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_forward.png"))));
         btUp.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_up.png"))));
         btPicker.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_open_folder.png"))));
-
     }
 
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Home");
-        frame.addMouseListener(new FolderPopClickListener());
-        frame.setContentPane(new Home().homePanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+        tree = new JTree();
+        TreeHelper treeHelper = new TreeHelper(tree);
+        treeHelper.initTree();
     }
 }

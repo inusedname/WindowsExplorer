@@ -45,14 +45,24 @@
           </component>
         </children>
       </toolbar>
-      <component id="d1f24" class="javax.swing.JTree" binding="treeBrowse">
-        <constraints border-constraint="West"/>
-        <properties/>
-      </component>
       <component id="e4ea5" class="javax.swing.JTable" binding="tableCurrentFolder">
         <constraints border-constraint="Center"/>
         <properties/>
       </component>
+      <scrollpane id="edcee" binding="leftScrollPane">
+        <constraints border-constraint="West"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="d1f24" class="javax.swing.JTree" binding="tree" custom-create="true">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+              <enabled value="true"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
     </children>
   </grid>
 </form>
