@@ -54,7 +54,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="d1f24" class="javax.swing.JTree" binding="treeBrowse" custom-create="true">
+          <component id="d1f24" class="javax.swing.JTree" binding="tree" custom-create="true">
             <constraints/>
             <properties>
               <editable value="false"/>
