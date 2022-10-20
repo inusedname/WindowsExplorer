@@ -1,16 +1,22 @@
 package controller.treebrowse;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.io.File;
 
 public class TreeHelper {
     private final JTree tree;
     private DefaultMutableTreeNode root;
 
-    public TreeHelper(JTree tree) {
+    final private CallBack callBack;
+    static String value = "";
+    public TreeHelper(JTree tree, CallBack callBack) {
         this.tree = tree;
+        this.callBack = callBack;
     }
 
     public void initTree() {
@@ -32,6 +38,21 @@ public class TreeHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                value = "";
+                TreePath treepath = e.getPath();
+                Object elements[] = treepath.getPath();
+                for (int i = 0, n = elements.length; i < n; i++) {
+                    value+=elements[i]+"\\";
+                }
+                callBack.onTreeClicked(value);
+            }
+        });
+    }
+
+    public interface CallBack{
+        public void onTreeClicked(String newDir);
     }
 
     private final class CreateChildNodes implements Runnable {
