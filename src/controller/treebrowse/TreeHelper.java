@@ -1,19 +1,24 @@
 package controller.treebrowse;
 
 import javax.swing.*;
+import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.tree.*;
+import java.awt.*;
 import java.io.File;
+import java.util.regex.Matcher;
 
 public class TreeHelper {
     private final JTree tree;
+    private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
-
+    private DefaultTreeModel model;
     final private CallBack callBack;
     static String value = "";
+
     public TreeHelper(JTree tree, CallBack callBack) {
         this.tree = tree;
         this.callBack = callBack;
@@ -24,82 +29,102 @@ public class TreeHelper {
         for (File sysDrive : rootDrive) {
             System.out.println("Drive : " + sysDrive);
         }
-
-        // TODO: Tree can show multiple Drives
         try {
-            File fileRoot = new File(rootDrive[0].toURI());
-            root = new DefaultMutableTreeNode(new FileNode(fileRoot));
-            tree.setModel(new DefaultTreeModel(root));
-            tree.setShowsRootHandles(true);
+            fileSystemView = FileSystemView.getFileSystemView();
 
-            // New node will be inserted into root
-            CreateChildNodes ccn = new CreateChildNodes(fileRoot, root);
-            new Thread(ccn).start();
+            root = new DefaultMutableTreeNode();
+
+            for (File fileSystemRoot : rootDrive) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
+                root.add( node );
+                addChildren(node);
+            }
+            model = new DefaultTreeModel(root);
+            tree.setModel(model);
+            tree.setShowsRootHandles(true);
+            tree.setRootVisible(false);
+            // tree GUI
+            tree.setCellRenderer(new FileTreeCellRenderer());
+            tree.addTreeSelectionListener(new TreeSelectionListener() {
+                public void valueChanged(TreeSelectionEvent e) {
+                    DefaultMutableTreeNode node =
+                            (DefaultMutableTreeNode)e.getPath().getLastPathComponent();
+                    addChildren(node);
+                    TreePath treepath = e.getPath();
+                    Object path = treepath.getLastPathComponent();
+                    callBack.onTreeClicked(path.toString());
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
-        tree.addTreeSelectionListener(new TreeSelectionListener() {
-            public void valueChanged(TreeSelectionEvent e) {
-                value = "";
-                TreePath treepath = e.getPath();
-                Object elements[] = treepath.getPath();
-                for (int i = 0, n = elements.length; i < n; i++) {
-                    value+=elements[i]+"\\";
-                }
-                callBack.onTreeClicked(value);
-            }
-        });
+
+
     }
 
     public interface CallBack{
         public void onTreeClicked(String newDir);
     }
-
-    private final class CreateChildNodes implements Runnable {
-
-        private final DefaultMutableTreeNode root;
-        private final File rootFile;
-
-        public CreateChildNodes(File rootFile, DefaultMutableTreeNode root) {
-            this.rootFile = rootFile;
-            this.root = root;
-        }
-
-        @Override
-        public void run() {
-            createChildren(rootFile, root);
-        }
-
-        private void createChildren(File fileRoot, DefaultMutableTreeNode node) {
-            File[] files = fileRoot.listFiles();
-            if (files == null) return;
-
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new FileNode(file));
-                    node.add(childNode);
-                    createChildren(file, childNode);
+    private void addChildren(final DefaultMutableTreeNode node) {
+        SwingWorker worker = new SwingWorker() {
+            @Override
+            public String doInBackground() {
+                tree.setEnabled(false);
+                File file = (File)node.getUserObject();
+                if ( file.isDirectory() ) {
+                    File[] files = fileSystemView.getFiles(file, true);
+                    if (node.isLeaf()) {
+                        for (File child : files) {
+                            if ( child.isDirectory() ) {
+                                node.add(new DefaultMutableTreeNode(child));
+                            }
+                        }
+                    }
                 }
+                tree.setEnabled(true);
+                return "done";
             }
-        }
-
+        };
+        worker.execute();
     }
 
-    private final class FileNode {
-        private final File file;
 
-        public FileNode(File file) {
-            this.file = file;
+    class FileTreeCellRenderer extends DefaultTreeCellRenderer {
+
+        private FileSystemView fileSystemView;
+
+        private JLabel label;
+
+        FileTreeCellRenderer() {
+            label = new JLabel();
+            label.setOpaque(true);
+            fileSystemView = FileSystemView.getFileSystemView();
         }
 
         @Override
-        public String toString() {
-            String name = file.getName();
-            if (name.equals("")) {
-                return file.getAbsolutePath();
+        public Component getTreeCellRendererComponent(
+                JTree tree,
+                Object value,
+                boolean selected,
+                boolean expanded,
+                boolean leaf,
+                int row,
+                boolean hasFocus) {
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+            File file = (File) node.getUserObject();
+            if (file == null) return label;
+            label.setIcon(fileSystemView.getSystemIcon(file));
+            label.setText(fileSystemView.getSystemDisplayName(file));
+            label.setToolTipText(file.getPath());
+
+            if (selected) {
+                label.setBackground(backgroundSelectionColor);
             } else {
-                return name;
+                label.setBackground(backgroundNonSelectionColor);
             }
+
+            return label;
         }
     }
 }
