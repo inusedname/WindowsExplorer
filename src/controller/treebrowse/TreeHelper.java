@@ -2,6 +2,7 @@ package controller.treebrowse;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -21,6 +22,9 @@ public class TreeHelper {
     }
 
     public void initTree() {
+        ((BasicTreeUI) tree.getUI()).setRightChildIndent(5);
+        ((BasicTreeUI) tree.getUI()).setLeftChildIndent(3);
+
         File[] rootDrive = File.listRoots();
         for (File sysDrive : rootDrive) {
             System.out.println("Drive : " + sysDrive);
@@ -80,7 +84,7 @@ public class TreeHelper {
         void onTreeClicked(String newDir);
     }
 
-    class FileTreeCellRenderer extends DefaultTreeCellRenderer {
+    private class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
         private final FileSystemView fileSystemView;
 
@@ -105,6 +109,7 @@ public class TreeHelper {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
             File file = (File) node.getUserObject();
             if (file == null) return label;
+            label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
             label.setIcon(fileSystemView.getSystemIcon(file));
             label.setText(fileSystemView.getSystemDisplayName(file));
             label.setToolTipText(file.getPath());
