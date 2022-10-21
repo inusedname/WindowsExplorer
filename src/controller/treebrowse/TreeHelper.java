@@ -6,6 +6,7 @@ import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
 
@@ -36,18 +37,17 @@ public class TreeHelper {
             for (File fileSystemRoot : rootDrive) {
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
                 root.add(node);
-                addChildren(node);
+                addChildren(node, null, false);
             }
             tree.setModel(new DefaultTreeModel(root));
             tree.setShowsRootHandles(true);
             tree.setRootVisible(false);
-
             // tree GUI
             tree.setCellRenderer(new FileTreeCellRenderer());
             tree.addTreeSelectionListener(e -> {
                 DefaultMutableTreeNode node =
                         (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
-                addChildren(node);
+                addChildren(node, e.getPath(), true);
                 callbacks.onTreeClicked(node.toString());
             });
         } catch (Exception e) {
@@ -57,10 +57,12 @@ public class TreeHelper {
 
     }
 
-    private void addChildren(final DefaultMutableTreeNode node) {
+    private void addChildren(final DefaultMutableTreeNode node, TreePath treepath, boolean expand) {
         SwingWorker<String, Object> worker = new SwingWorker<>() {
+
             @Override
             public String doInBackground() {
+
                 tree.setEnabled(false);
                 File file = (File) node.getUserObject();
                 if (file.isDirectory()) {
@@ -68,16 +70,27 @@ public class TreeHelper {
                     if (node.isLeaf()) {
                         for (File child : files) {
                             if (child.isDirectory()) {
-                                node.add(new DefaultMutableTreeNode(child));
+                                DefaultMutableTreeNode childnode = new DefaultMutableTreeNode(child);
+                                node.add(childnode);
                             }
                         }
                     }
                 }
+
                 tree.setEnabled(true);
                 return "done";
             }
+            @Override
+            protected void done() {
+                tree.setEnabled(false);
+                if (expand == true && treepath != null){
+                    tree.expandPath(treepath);
+                }
+                tree.setEnabled(true);
+            }
         };
         worker.execute();
+
     }
 
     public interface TreeCallbacks {
