@@ -1,27 +1,23 @@
 package controller.treebrowse;
 
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.tree.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
-import java.util.regex.Matcher;
 
 public class TreeHelper {
+    static String value = "";
     private final JTree tree;
+    final private TreeCallbacks callbacks;
     private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
-    private DefaultTreeModel model;
-    final private CallBack callBack;
-    static String value = "";
 
-    public TreeHelper(JTree tree, CallBack callBack) {
+    public TreeHelper(JTree tree, TreeCallbacks callbacks) {
         this.tree = tree;
-        this.callBack = callBack;
+        this.callbacks = callbacks;
     }
 
     public void initTree() {
@@ -31,29 +27,24 @@ public class TreeHelper {
         }
         try {
             fileSystemView = FileSystemView.getFileSystemView();
-
             root = new DefaultMutableTreeNode();
 
             for (File fileSystemRoot : rootDrive) {
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
-                root.add( node );
+                root.add(node);
                 addChildren(node);
             }
-            model = new DefaultTreeModel(root);
-            tree.setModel(model);
+            tree.setModel(new DefaultTreeModel(root));
             tree.setShowsRootHandles(true);
             tree.setRootVisible(false);
+
             // tree GUI
             tree.setCellRenderer(new FileTreeCellRenderer());
-            tree.addTreeSelectionListener(new TreeSelectionListener() {
-                public void valueChanged(TreeSelectionEvent e) {
-                    DefaultMutableTreeNode node =
-                            (DefaultMutableTreeNode)e.getPath().getLastPathComponent();
-                    addChildren(node);
-                    TreePath treepath = e.getPath();
-                    Object path = treepath.getLastPathComponent();
-                    callBack.onTreeClicked(path.toString());
-                }
+            tree.addTreeSelectionListener(e -> {
+                DefaultMutableTreeNode node =
+                        (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+                addChildren(node);
+                callbacks.onTreeClicked(node.toString());
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -62,20 +53,17 @@ public class TreeHelper {
 
     }
 
-    public interface CallBack{
-        public void onTreeClicked(String newDir);
-    }
     private void addChildren(final DefaultMutableTreeNode node) {
-        SwingWorker worker = new SwingWorker() {
+        SwingWorker<String, Object> worker = new SwingWorker<>() {
             @Override
             public String doInBackground() {
                 tree.setEnabled(false);
-                File file = (File)node.getUserObject();
-                if ( file.isDirectory() ) {
+                File file = (File) node.getUserObject();
+                if (file.isDirectory()) {
                     File[] files = fileSystemView.getFiles(file, true);
                     if (node.isLeaf()) {
                         for (File child : files) {
-                            if ( child.isDirectory() ) {
+                            if (child.isDirectory()) {
                                 node.add(new DefaultMutableTreeNode(child));
                             }
                         }
@@ -88,12 +76,15 @@ public class TreeHelper {
         worker.execute();
     }
 
+    public interface TreeCallbacks {
+        void onTreeClicked(String newDir);
+    }
 
     class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
-        private FileSystemView fileSystemView;
+        private final FileSystemView fileSystemView;
 
-        private JLabel label;
+        private final JLabel label;
 
         FileTreeCellRenderer() {
             label = new JLabel();
