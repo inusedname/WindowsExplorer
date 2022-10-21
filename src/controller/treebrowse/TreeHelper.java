@@ -1,16 +1,23 @@
 package controller.treebrowse;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
 import java.io.File;
 
 public class TreeHelper {
+    static String value = "";
     private final JTree tree;
+    final private TreeCallbacks callbacks;
+    private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
 
-    public TreeHelper(JTree tree) {
+    public TreeHelper(JTree tree, TreeCallbacks callbacks) {
         this.tree = tree;
+        this.callbacks = callbacks;
     }
 
     public void initTree() {
@@ -18,67 +25,97 @@ public class TreeHelper {
         for (File sysDrive : rootDrive) {
             System.out.println("Drive : " + sysDrive);
         }
-
-        // TODO: Tree can show multiple Drives
         try {
-            File fileRoot = new File(rootDrive[0].toURI());
-            root = new DefaultMutableTreeNode(new FileNode(fileRoot));
+            fileSystemView = FileSystemView.getFileSystemView();
+            root = new DefaultMutableTreeNode();
+
+            for (File fileSystemRoot : rootDrive) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
+                root.add(node);
+                addChildren(node);
+            }
             tree.setModel(new DefaultTreeModel(root));
             tree.setShowsRootHandles(true);
+            tree.setRootVisible(false);
 
-            // New node will be inserted into root
-            CreateChildNodes ccn = new CreateChildNodes(fileRoot, root);
-            new Thread(ccn).start();
+            // tree GUI
+            tree.setCellRenderer(new FileTreeCellRenderer());
+            tree.addTreeSelectionListener(e -> {
+                DefaultMutableTreeNode node =
+                        (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+                addChildren(node);
+                callbacks.onTreeClicked(node.toString());
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 
-    private final class CreateChildNodes implements Runnable {
-
-        private final DefaultMutableTreeNode root;
-        private final File rootFile;
-
-        public CreateChildNodes(File rootFile, DefaultMutableTreeNode root) {
-            this.rootFile = rootFile;
-            this.root = root;
-        }
-
-        @Override
-        public void run() {
-            createChildren(rootFile, root);
-        }
-
-        private void createChildren(File fileRoot, DefaultMutableTreeNode node) {
-            File[] files = fileRoot.listFiles();
-            if (files == null) return;
-
-            for (File file : files) {
+    private void addChildren(final DefaultMutableTreeNode node) {
+        SwingWorker<String, Object> worker = new SwingWorker<>() {
+            @Override
+            public String doInBackground() {
+                tree.setEnabled(false);
+                File file = (File) node.getUserObject();
                 if (file.isDirectory()) {
-                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new FileNode(file));
-                    node.add(childNode);
-                    createChildren(file, childNode);
+                    File[] files = fileSystemView.getFiles(file, true);
+                    if (node.isLeaf()) {
+                        for (File child : files) {
+                            if (child.isDirectory()) {
+                                node.add(new DefaultMutableTreeNode(child));
+                            }
+                        }
+                    }
                 }
+                tree.setEnabled(true);
+                return "done";
             }
-        }
-
+        };
+        worker.execute();
     }
 
-    private final class FileNode {
-        private final File file;
+    public interface TreeCallbacks {
+        void onTreeClicked(String newDir);
+    }
 
-        public FileNode(File file) {
-            this.file = file;
+    class FileTreeCellRenderer extends DefaultTreeCellRenderer {
+
+        private final FileSystemView fileSystemView;
+
+        private final JLabel label;
+
+        FileTreeCellRenderer() {
+            label = new JLabel();
+            label.setOpaque(true);
+            fileSystemView = FileSystemView.getFileSystemView();
         }
 
         @Override
-        public String toString() {
-            String name = file.getName();
-            if (name.equals("")) {
-                return file.getAbsolutePath();
+        public Component getTreeCellRendererComponent(
+                JTree tree,
+                Object value,
+                boolean selected,
+                boolean expanded,
+                boolean leaf,
+                int row,
+                boolean hasFocus) {
+
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+            File file = (File) node.getUserObject();
+            if (file == null) return label;
+            label.setIcon(fileSystemView.getSystemIcon(file));
+            label.setText(fileSystemView.getSystemDisplayName(file));
+            label.setToolTipText(file.getPath());
+
+            if (selected) {
+                label.setBackground(backgroundSelectionColor);
             } else {
-                return name;
+                label.setBackground(backgroundNonSelectionColor);
             }
+
+            return label;
         }
     }
 }
