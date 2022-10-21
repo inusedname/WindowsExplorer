@@ -37,7 +37,6 @@ public class TreeHelper {
             for (File fileSystemRoot : rootDrive) {
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
                 root.add(node);
-                addChildren(node, null, false);
             }
             tree.setModel(new DefaultTreeModel(root));
             tree.setShowsRootHandles(true);
@@ -47,7 +46,7 @@ public class TreeHelper {
             tree.addTreeSelectionListener(e -> {
                 DefaultMutableTreeNode node =
                         (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
-                addChildren(node, e.getPath(), true);
+                addChildrenThenExpand(node, e.getPath());
                 callbacks.onTreeClicked(node.toString());
             });
         } catch (Exception e) {
@@ -57,17 +56,17 @@ public class TreeHelper {
 
     }
 
-    private void addChildren(final DefaultMutableTreeNode node, TreePath treepath, boolean expand) {
+    private void addChildrenThenExpand(final DefaultMutableTreeNode node, final TreePath treePath) {
         SwingWorker<String, Object> worker = new SwingWorker<>() {
-
+            boolean isLeaf = false;
             @Override
             public String doInBackground() {
-
                 tree.setEnabled(false);
                 File file = (File) node.getUserObject();
                 if (file.isDirectory()) {
                     File[] files = fileSystemView.getFiles(file, true);
                     if (node.isLeaf()) {
+                        isLeaf = true;
                         for (File child : files) {
                             if (child.isDirectory()) {
                                 DefaultMutableTreeNode childnode = new DefaultMutableTreeNode(child);
@@ -76,15 +75,14 @@ public class TreeHelper {
                         }
                     }
                 }
-
                 tree.setEnabled(true);
                 return "done";
             }
             @Override
             protected void done() {
                 tree.setEnabled(false);
-                if (expand == true && treepath != null){
-                    tree.expandPath(treepath);
+                if (isLeaf == true){
+                    tree.expandPath(treePath);
                 }
                 tree.setEnabled(true);
             }
