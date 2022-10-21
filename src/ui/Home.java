@@ -1,7 +1,6 @@
 package ui;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import controller.treebrowse.TreeHelper;
 
 import javax.swing.*;
@@ -33,6 +32,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
         frame.setContentPane(new Home().homePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
@@ -46,14 +46,22 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
         }
 
         homePanel.setPreferredSize(new Dimension(1280, 720));
+        tree.setToggleClickCount(1);
+        tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setUpIcons();
     }
 
     private void setUpIcons() {
-        btBack.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_back.png"))));
-        btForward.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_forward.png"))));
-        btUp.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_up.png"))));
-        btPicker.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_open_folder.png"))));
+
+        ImageIcon iconBack = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_back.png")));
+        ImageIcon iconForward = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_forward.png")));
+        ImageIcon iconUp = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_up.png")));
+        ImageIcon iconPicker = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_open_folder.png")));
+
+        btBack.setIcon(iconBack);
+        btForward.setIcon(iconForward);
+        btUp.setIcon(iconUp);
+        btPicker.setIcon(iconPicker);
     }
 
     private void createUIComponents() {
@@ -64,7 +72,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
     }
 
     @Override
-    public void onTreeClicked(String newDir){
-        System.out.println(newDir);
+    public void onTreeClicked(String newDir) {
+        tfAddress.setText(newDir);
     }
 }
