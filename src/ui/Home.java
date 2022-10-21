@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class Home implements Runnable {
+public class Home implements Runnable, TreeHelper.CallBack {
     private JPanel homePanel;
     private JTree tree;
     private JButton btBack;
@@ -51,7 +51,12 @@ public class Home implements Runnable {
     private void createUIComponents() {
         // TODO: place custom component creation code here
         tree = new JTree();
-        TreeHelper treeHelper = new TreeHelper(tree);
+        TreeHelper treeHelper = new TreeHelper(tree, this);
         treeHelper.initTree();
+    }
+
+    @Override
+    public void onTreeClicked(String newDir){
+        System.out.println(newDir);
     }
 }
