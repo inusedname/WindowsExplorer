@@ -16,6 +16,7 @@ public class TreeHelper {
     final private TreeCallbacks callbacks;
     private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
+    TreePath submitTreePath;
 
     public TreeHelper(JTree tree, TreeCallbacks callbacks) {
         this.tree = tree;
@@ -52,8 +53,6 @@ public class TreeHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void addChildrenThenExpand(final DefaultMutableTreeNode node) {
@@ -80,14 +79,11 @@ public class TreeHelper {
                 tree.setEnabled(true);
                 return "done";
             }
-
             @Override
             protected void done() {
                 tree.setEnabled(false);
                 if (isLeaf == true) {
-
                     tree.expandPath(new TreePath(node.getPath()));
-
                 }
                 tree.setEnabled(true);
             }
@@ -96,108 +92,101 @@ public class TreeHelper {
 
     }
 
+    private void addChildren(final DefaultMutableTreeNode node, String[] pathList, int idx) {
+        SwingWorker<String, Object> worker = new SwingWorker<>() {
+            boolean isLeaf = false;
+
+            @Override
+            public String doInBackground() {
+                tree.setEnabled(false);
+                File file = (File) node.getUserObject();
+                if (file.isDirectory()) {
+                    File[] files = fileSystemView.getFiles(file, true);
+                    if (node.isLeaf()) {
+                        isLeaf = true;
+                        for (File child : files) {
+                            if (child.isDirectory()) {
+                                DefaultMutableTreeNode childnode = new DefaultMutableTreeNode(child);
+                                node.add(childnode);
+
+                            }
+                        }
+                    }
+                }
+                tree.setEnabled(true);
+                return "done";
+            }
+
+            @Override
+            protected void done() {
+                setTreePath(node, pathList, idx);
+            }
+        };
+        worker.execute();
+
+    }
+
+    //from root node find scan all childnode and find one equal to path recursively
     public boolean goToPath(String path) {
         File file = new File(path);
+        if (!file.exists()){
+            return false;
+        }
+        while(!file.isDirectory()){
+            file = file.getParentFile();
+        }
         File tmp = file;
-
         int dem = 1;
         while (tmp.getParentFile() != null) {
             dem += 1;
             tmp = tmp.getParentFile();
         }
         String[] pathList = new String[dem];
-
         pathList[dem - 1] = file.toString();
         dem -= 1;
         while (file.getParentFile() != null) {
             dem -= 1;
             file = file.getParentFile();
             pathList[dem] = file.toString();
-
         }
-        System.out.println(findTreePath(root, pathList, 0));
-        //   tree.expandPath(findTreePath(root, pathList, 0));
-
-//        while (true) {
-//            if (curIdx >= pathList.length) break;
-//            boolean check = false;
-//            for (int i = 0; i < curNode.getChildCount(); i++) {
-//                DefaultMutableTreeNode tmpNode = (DefaultMutableTreeNode) curNode.getChildAt(i);
-////                System.out.println(tmpNode.toString());
-////                System.out.println(pathList[curIdx]);
-////                System.out.println("lll");
-//                if (tmpNode.toString().equals(pathList[curIdx])) {
-//                    curNode = tmpNode;
-//                    curIdx += 1;
-//                    check = true;
-//                    if (tmpNode.isLeaf()) {
-//                        addChildrenThenExpand(tmpNode);
-//                    }
-//                    break;
-//                }
-//            }
-//            if (check == false) {
-//                curNode = (DefaultMutableTreeNode) curNode.getChildAt(0);
-//            }
-//        }
-//        tree.expandPath(new TreePath(curNode.getPath()));
+        setTreePath(root, pathList, 0);
         return true;
     }
 
-    private DefaultMutableTreeNode findTreePath(DefaultMutableTreeNode node, String[] pathList, int idx) {
-        final DefaultMutableTreeNode[] treePath = new DefaultMutableTreeNode[1];
-//        System.out.println(node);
+    public void setTreePath(DefaultMutableTreeNode node, String[] pathList, int idx){
         if (idx >= pathList.length) {
-            System.out.println("bruh");
-            System.out.println(node);
-            return node;
+            submitTreePath = new TreePath(node.getPath());
+            tree.expandPath(submitTreePath);
+            tree.clearSelection();
+            tree.addSelectionPath(submitTreePath);
+            tree.scrollPathToVisible(submitTreePath);
+            return;
         }
-        SwingWorker<String, Object> worker1 = new SwingWorker<>() {
-
-            @Override
-            public String doInBackground() {
-                SwingWorker<String, Object> worker = new SwingWorker<>() {
-                    boolean isLeaf = false;
-                    DefaultMutableTreeNode nextNode;
-
-                    int nextIdx;
-
-                    @Override
-                    public String doInBackground() {
-                        boolean check = false;
-                        for (int i = 0; i < node.getChildCount(); i++) {
-                            nextNode = (DefaultMutableTreeNode) node.getChildAt(i);
-                            if (nextNode.toString().equals(pathList[idx])) {
-                                nextIdx = idx + 1;
-                                check = true;
-                                if (nextNode.isLeaf()) {
-                                    tree.setEnabled(false);
-                                    addChildrenThenExpand(nextNode);
-                                    tree.setEnabled(true);
-                                }
-                                break;
-                            }
-                        }
-                        if (check == false) {
-                            nextNode = (DefaultMutableTreeNode) node.getFirstChild();
-                            nextIdx = idx;
-                        }
-                        return "done";
-                    }
-
-                    @Override
-                    protected void done() {
-                        treePath[0] = findTreePath(nextNode, pathList, nextIdx);
-                    }
-                };
-                worker.execute();
-                return "done";
+        boolean check = false;
+        int nextIdx = idx;
+        DefaultMutableTreeNode nextNode = null;
+        for (int i = 0; i < node.getChildCount(); i++) {
+            nextNode = (DefaultMutableTreeNode) node.getChildAt(i);
+            if (nextNode.toString().equals(pathList[idx])) {
+                nextIdx += 1;
+                check = true;
+                if (nextNode.isLeaf()) {
+                    tree.setEnabled(false);
+                    addChildren(nextNode, pathList, nextIdx);
+                    tree.setEnabled(true);
+                }
+                else{
+                    setTreePath(nextNode, pathList, nextIdx);
+                }
+                break;
             }
-        };
-        worker1.execute();
-        return treePath[0];
-    }
+        }
+        if (check == false) {
+            nextNode = (DefaultMutableTreeNode) node.getFirstChild();
+            setTreePath(nextNode, pathList, nextIdx);
+        }
 
+    }
     public interface TreeCallbacks {
         void onTreeClicked(String newDir);
     }
