@@ -63,9 +63,9 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
              *  Nếu là file thì trỏ tới folder chứa file đó, như trên
              */
 
-//            if (!tree.goToPath(path)) {
-//                JOptionPane.showMessageDialog(homePanel, "Invalid path");
-//            }
+            if (!treeHelper.goToPath(path)) {
+                JOptionPane.showMessageDialog(homePanel, "Invalid path");
+            }
         });
     }
 
