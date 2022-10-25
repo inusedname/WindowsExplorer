@@ -13,9 +13,9 @@ import java.io.File;
 public class TreeHelper {
     private final JTree tree;
     final private TreeCallbacks callbacks;
+    TreePath submitTreePath;
     private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
-    TreePath submitTreePath;
 
     public TreeHelper(JTree tree, TreeCallbacks callbacks) {
         this.tree = tree;
@@ -167,7 +167,7 @@ public class TreeHelper {
                 break;
             }
         }
-        if (check) {
+        if (!check) {
             nextNode = (DefaultMutableTreeNode) node.getFirstChild();
             setTreePath(nextNode, pathList, nextIdx);
         }
