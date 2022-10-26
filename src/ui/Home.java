@@ -1,6 +1,7 @@
 package ui;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import controller.table.TableHelper;
 import controller.treebrowse.TreeHelper;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
 
     private TreeHelper treeHelper;
 
+    private TableHelper tableHelper;
     public Home() {
         setUpUI();
         setUpActionListeners();
@@ -108,6 +110,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
     private void createUIComponents() {
         // TODO: place custom component creation code here
         setUpJTree();
+        setUpJTable();
     }
 
     private void setUpJTree() {
@@ -117,9 +120,16 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
         treeHelper = new TreeHelper(tree, this);
         treeHelper.initTree();
     }
-
-    @Override
-    public void onTreeClicked(String newDir) {
-        tfAddress.setText(newDir);
+    private void setUpJTable() {
+        String[] columnNames = {"Name", "Age", "City"};
+        Object[][] data = {{"Raja", "35", "Hyderabad"}, {"Adithya", "25", "Chennai"},
+                {"Vineet", "23", "Mumbai"},
+                {"Archana", "32", "Pune"},
+                {"Krishna", "30", "Kolkata"}};
+        tableCurrentFolder = new JTable(data, columnNames);
+        tableHelper = new TableHelper(tableCurrentFolder);
+        tableHelper.initTable();
     }
+    @Override
+    public void onTreeClicked(String newDir) {tfAddress.setText(newDir);}
 }

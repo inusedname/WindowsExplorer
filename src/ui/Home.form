@@ -45,7 +45,7 @@
           </component>
         </children>
       </toolbar>
-      <component id="e4ea5" class="javax.swing.JTable" binding="tableCurrentFolder">
+      <component id="e4ea5" class="javax.swing.JTable" binding="tableCurrentFolder" custom-create="true">
         <constraints border-constraint="Center"/>
         <properties/>
       </component>
