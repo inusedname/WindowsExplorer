@@ -1,6 +1,8 @@
 package ui;
 
+
 import com.formdev.flatlaf.FlatDarculaLaf;
+import controller.table.TableHelper;
 import controller.treebrowse.TreeHelper;
 
 import javax.swing.*;
@@ -14,6 +16,9 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
     private JButton btForward;
     private JButton btUp;
     private JTable tableCurrentFolder;
+
+    private  TableHelper tableHelper;
+
     private JTextField tfAddress;
     private JButton btPicker;
     private JScrollPane leftScrollPane;
@@ -66,6 +71,10 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
             if (!treeHelper.goToPath(path)) {
                 JOptionPane.showMessageDialog(homePanel, "Invalid path");
             }
+            if (!tableHelper.goToPath(path))
+            {
+                JOptionPane.showMessageDialog(homePanel, "Invalid path");
+            }
         });
     }
 
@@ -108,6 +117,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
     private void createUIComponents() {
         // TODO: place custom component creation code here
         setUpJTree();
+        setUpJTable();
     }
 
     private void setUpJTree() {
@@ -118,8 +128,15 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
         treeHelper.initTree();
     }
 
+    private void setUpJTable() {
+        tableCurrentFolder = new JTable();
+        tableHelper = new TableHelper(tableCurrentFolder);
+        tableHelper.initTable();
+
+    }
     @Override
     public void onTreeClicked(String newDir) {
         tfAddress.setText(newDir);
+        tableHelper.goToPath(newDir);
     }
 }

@@ -1,18 +1,22 @@
 package controller.treebrowse;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.basic.BasicTreeUI;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 public class TreeHelper {
     private final JTree tree;
     final private TreeCallbacks callbacks;
+
     TreePath submitTreePath;
     private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
@@ -74,6 +78,8 @@ public class TreeHelper {
     }
 
 
+
+
     private void addChildrenThenExpand(final DefaultMutableTreeNode node) {
         SwingWorker<String, Object> worker = new SwingWorker<>() {
 
@@ -111,7 +117,7 @@ public class TreeHelper {
 
     }
 
-    //from root node find scan all childnode and find one equal to path recursively
+    //from root node find scan all childNode and find one equal to path recursively
     public boolean goToPath(String path) {
         File file = new File(path);
         if (!file.exists()) {
@@ -139,6 +145,7 @@ public class TreeHelper {
         setTreePath(root, pathList, 0);
         return true;
     }
+
 
     public void setTreePath(DefaultMutableTreeNode node, String[] pathList, int idx) {
         if (idx >= pathList.length) {
@@ -177,6 +184,8 @@ public class TreeHelper {
     public interface TreeCallbacks {
         void onTreeClicked(String newDir);
     }
+
+
 
     private static class FileTreeCellRenderer extends DefaultTreeCellRenderer {
 
