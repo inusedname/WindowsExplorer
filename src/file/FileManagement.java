@@ -9,37 +9,30 @@ import java.io.OutputStream;
 
 public class FileManagement {
 
-    public void deleteFile(String inputPath, String inputFile) {
+    public void deleteFile(String path) {
         try {
             // delete the original file
-            new File(inputPath + inputFile).delete();
+            new File(path).delete();
         } catch (Exception e) {
             //Log.e("tag", e.getMessage());
         }
     }
 
-    public void renameFile(String inputPath, String inputFile, String outputFile) {
+    public void renameFile(String oldPath, String newPath) {
         try {
             // rename the original file
-            new File(inputPath + inputFile).renameTo(new File(inputPath + outputFile));
+            new File(oldPath).renameTo(new File(newPath));
         } catch (Exception e) {
             //Log.e("tag", e.getMessage());
         }
     }
 
-    public void moveFile(String inputPath, String inputFile, String outputPath) {
+    public void moveFile(String oldPath, String newPath) {
         InputStream in = null;
         OutputStream out = null;
         try {
-
-            //create output directory if it doesn't exist
-            File dir = new File(outputPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            in = new FileInputStream(inputPath + inputFile);
-            out = new FileOutputStream(outputPath + inputFile);
+            in = new FileInputStream(oldPath);
+            out = new FileOutputStream(newPath);
 
             byte[] buffer = new byte[1024];
             int read;
@@ -55,7 +48,7 @@ public class FileManagement {
             out = null;
 
             // delete the original file
-            new File(inputPath + inputFile).delete();
+            new File(oldPath).delete();
 
         } catch (FileNotFoundException fnfe1) {
             //Log.e("tag", fnfe1.getMessage());
@@ -64,20 +57,13 @@ public class FileManagement {
         }
     }
 
-    public void copyFile(String inputPath, String inputFile, String outputPath) {
+    public void copyFile(String oldPath, String newPath) {
 
         InputStream in = null;
         OutputStream out = null;
         try {
-
-            //create output directory if it doesn't exist
-            File dir = new File(outputPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            in = new FileInputStream(inputPath + inputFile);
-            out = new FileOutputStream(outputPath + inputFile);
+            in = new FileInputStream(oldPath);
+            out = new FileOutputStream(newPath);
 
             byte[] buffer = new byte[1024];
             int read;
