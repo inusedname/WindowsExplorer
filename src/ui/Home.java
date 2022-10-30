@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class Home implements Runnable, TreeHelper.TreeCallbacks {
+public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.TableCallbacks {
     private JPanel homePanel;
     private JTree tree;
     private JButton btBack;
@@ -130,13 +130,21 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
 
     private void setUpJTable() {
         tableCurrentFolder = new JTable();
-        tableHelper = new TableHelper(tableCurrentFolder);
+        tableHelper = new TableHelper(tableCurrentFolder,this);
         tableHelper.initTable();
 
     }
     @Override
     public void onTreeClicked(String newDir) {
         tfAddress.setText(newDir);
+        tableHelper.setDir(newDir);
         tableHelper.goToPath(newDir);
+    }
+
+    @Override
+    public void onTableClicked(String newDir) {
+        tfAddress.setText(newDir);
+        tableHelper.goToPath(newDir);
+        tableHelper.setDir(newDir);
     }
 }

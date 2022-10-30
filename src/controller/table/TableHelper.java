@@ -1,18 +1,32 @@
 package controller.table;
 
+import controller.treebrowse.TreeHelper;
+
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
 public class TableHelper {
 
-
+    private String dir;
     public DefaultTableModel model = new DefaultTableModel();
 
     public String[] HEADER = new String[] { "Name", "Date modified", "Type", "Size" };
     private final JTable table;
-    public TableHelper(JTable table) {
+    private TableHelper.TableCallbacks callbacks;
+    public TableHelper(JTable table, TableCallbacks callbacks) {
         this.table = table;
+        this.callbacks = callbacks;
+        dir = "";
+    }
+    public void setDir(String _dir)
+    {
+        dir = _dir;
     }
     public void initTable(){
         setTable();
@@ -51,6 +65,7 @@ public class TableHelper {
     }
     public void setTable()
     {
+
         JScrollPane scrollPane = new JScrollPane();
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setShowGrid(false);
@@ -58,6 +73,23 @@ public class TableHelper {
         scrollPane.setViewportView(table);
         model.setColumnIdentifiers(HEADER);
         table.setModel(model);
+        table.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table =(JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                String name = String.valueOf(table.getValueAt(row,0));
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                    String newDir = dir + "\\" + name;
+                    File file = new File(newDir);
+                    if(file.isDirectory())
+                    {
+                        callbacks.onTableClicked(newDir);
+                    }
+
+                }
+            }
+        });
     }
 
     public boolean goToPath(String path)
@@ -73,5 +105,13 @@ public class TableHelper {
         table.setModel(model);
         return  true;
     }
+
+
+    public interface TableCallbacks
+    {
+        void onTableClicked(String newDir);
+    }
+
+
 
 }
