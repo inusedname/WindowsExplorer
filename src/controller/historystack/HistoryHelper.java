@@ -1,42 +1,58 @@
 package controller.historystack;
 
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HistoryHelper {
-    private int currentHistoryIndex = -1;
+
+    private final CurrentHistoryIndex current = new CurrentHistoryIndex();
     private final List<HistoryNode> historyStack = new ArrayList<>();
 
+    public int getHistoryStackSize() {
+        return historyStack.size();
+    }
+
     public void pushBackHistory(HistoryNode node) {
-        if (historyStack.size() - 1 != currentHistoryIndex) {
+        if (!new File(node.getPath()).exists() ||
+                (historyStack.size() > 0 &&
+                        historyStack.get(historyStack.size() - 1).getPath().equals(node.getPath()))) {
+            return;
+        }
+        while (historyStack.size() - 1 != current.getIndex()) {
             historyStack.remove(historyStack.size() - 1);
         }
         historyStack.add(node);
-        currentHistoryIndex++;
+        current.setIndex(current.getIndex() + 1);
     }
 
     public void pushBackHistory(String path) {
         pushBackHistory(new HistoryNode(path));
     }
 
-    public HistoryNode getPreviousHistory() {
-        if (currentHistoryIndex > 0) {
-            currentHistoryIndex--;
-            return historyStack.get(currentHistoryIndex);
+    public HistoryNode goToPreviousHistory() {
+        if (current.getIndex() > 0) {
+            current.setIndex(current.getIndex() - 1);
+            return historyStack.get(current.getIndex());
         }
         return null;
     }
 
-    public HistoryNode getNextHistory() {
-        if (currentHistoryIndex < historyStack.size() - 1) {
-            currentHistoryIndex++;
-            return historyStack.get(currentHistoryIndex);
+    public HistoryNode goToNextHistory() {
+        if (current.getIndex() < historyStack.size() - 1) {
+            current.setIndex(current.getIndex() + 1);
+            return historyStack.get(current.getIndex());
         }
         return null;
     }
 
     public HistoryNode getCurrentHistory() {
-        return historyStack.get(currentHistoryIndex);
+        return historyStack.get(current.getIndex());
+    }
+
+    public void addHistoryChangeListener(PropertyChangeListener listener) {
+        current.addHistoryChangeListener(listener);
     }
 
     public static class HistoryNode {

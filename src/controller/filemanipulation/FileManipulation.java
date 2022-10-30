@@ -1,10 +1,6 @@
 package controller.filemanipulation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class FileManipulation {
 
@@ -24,7 +20,7 @@ public class FileManipulation {
         return false;
     }
 
-    public void moveFile(String oldPath, String newPath) {
+    public boolean moveFile(String oldPath, String newPath) {
         InputStream in;
         OutputStream out;
         try {
@@ -40,9 +36,10 @@ public class FileManipulation {
             out.flush();
             out.close();
 
-            new File(oldPath).delete();
+            return new File(oldPath).delete();
         } catch (Exception ignored) {
         }
+        return false;
     }
 
     public void copyFile(String oldPath, String newPath) {
