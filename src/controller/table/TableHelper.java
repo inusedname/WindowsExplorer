@@ -1,39 +1,21 @@
 package controller.table;
 
-import controller.treebrowse.TreeHelper;
-
 import javax.swing.*;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
+
 public class TableHelper {
 
-    private String dir;
-    public DefaultTableModel model = new DefaultTableModel();
-
-    public String[] HEADER = new String[] { "Name", "Date modified", "Type", "Size" };
     private final JTable table;
-    private TableHelper.TableCallbacks callbacks;
-    public TableHelper(JTable table, TableCallbacks callbacks) {
-        this.table = table;
-        this.callbacks = callbacks;
-        dir = "";
-    }
-    public void setDir(String _dir)
-    {
-        dir = _dir;
-    }
-    public void initTable(){
-        setTable();
-    }
-
-    public DefaultTableModel createTableData( String folder )
-    {
+    private final TableHelper.TableCallbacks callbacks;
+    public DefaultTableModel model = new DefaultTableModel();
+    private final String[] HEADER = new String[]{"Name", "Date modified", "Type", "Size"};
+    private String dir = "";
+    private DefaultTableModel createTableData(String folder) {
         DefaultTableModel tb = new DefaultTableModel();
         tb.setColumnIdentifiers(HEADER);
         if (tb.getRowCount() > 0) {
@@ -59,12 +41,16 @@ public class TableHelper {
             }
             SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             String misclassified = date.format(files.lastModified());
-            tb.addRow(new Object[] { name, misclassified, type, size });
+            tb.addRow(new Object[]{name, misclassified, type, size});
         }
         return tb;
     }
-    public void setTable()
-    {
+
+    public TableHelper(JTable table, TableCallbacks callbacks) {
+        this.table = table;
+        this.callbacks = callbacks;
+    }
+    public void initTable() {
 
         JScrollPane scrollPane = new JScrollPane();
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -75,25 +61,23 @@ public class TableHelper {
         table.setModel(model);
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
-                JTable table =(JTable) mouseEvent.getSource();
+                JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
-                String name = String.valueOf(table.getValueAt(row,0));
+                String name = String.valueOf(table.getValueAt(row, 0));
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     String newDir = dir + "\\" + name;
                     File file = new File(newDir);
-                    if(file.isDirectory())
-                    {
+                    if (file.isDirectory()) {
                         callbacks.onTableClicked(newDir);
                     }
-
                 }
             }
         });
     }
 
-    public boolean goToPath(String path)
-    {
+    public boolean goToPath(String path) {
+        dir = path;
         File file = new File(path);
         if (!file.exists()) {
             return false;
@@ -103,15 +87,11 @@ public class TableHelper {
         }
         model = createTableData(file.toString());
         table.setModel(model);
-        return  true;
+        return true;
     }
 
-
-    public interface TableCallbacks
-    {
+    public interface TableCallbacks {
         void onTableClicked(String newDir);
     }
-
-
 
 }

@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.TableCallbacks {
+public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.TableCallbacks {
     private JPanel homePanel;
     private JTree tree;
     private JButton btBack;
@@ -17,7 +17,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
     private JButton btUp;
     private JTable tableCurrentFolder;
 
-    private  TableHelper tableHelper;
+    private TableHelper tableHelper;
 
     private JTextField tfAddress;
     private JButton btPicker;
@@ -71,8 +71,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
             if (!treeHelper.goToPath(path)) {
                 JOptionPane.showMessageDialog(homePanel, "Invalid path");
             }
-            if (!tableHelper.goToPath(path))
-            {
+            if (!tableHelper.goToPath(path)) {
                 JOptionPane.showMessageDialog(homePanel, "Invalid path");
             }
         });
@@ -130,14 +129,14 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
 
     private void setUpJTable() {
         tableCurrentFolder = new JTable();
-        tableHelper = new TableHelper(tableCurrentFolder,this);
+        tableHelper = new TableHelper(tableCurrentFolder, this);
         tableHelper.initTable();
 
     }
+
     @Override
     public void onTreeClicked(String newDir) {
         tfAddress.setText(newDir);
-        tableHelper.setDir(newDir);
         tableHelper.goToPath(newDir);
     }
 
@@ -145,6 +144,5 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
     public void onTableClicked(String newDir) {
         tfAddress.setText(newDir);
         tableHelper.goToPath(newDir);
-        tableHelper.setDir(newDir);
     }
 }
