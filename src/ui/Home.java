@@ -3,7 +3,9 @@ package ui;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import controller.table.TableHelper;
+import controller.historystack.HistoryHelper;
 import controller.treebrowse.TreeHelper;
+import utils.PathUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,9 +23,8 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
 
     private JTextField tfAddress;
     private JButton btPicker;
-    private JScrollPane leftScrollPane;
-
-    private TreeHelper treeHelper;
+    private final HistoryHelper historyHelper = new HistoryHelper();
+    private final TreeHelper treeHelper = new TreeHelper(tree, this);
 
     public Home() {
         setUpUI();
@@ -36,37 +37,29 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
 
     private void setUpActionListeners() {
         setUpTextFieldActionListener();
+        setUpNavigationBarActionListener();
+    }
+
+    private void setUpNavigationBarActionListener() {
+        btBack.addActionListener(e -> {
+            String newPath = historyHelper.getPreviousHistory().getPath();
+            // TODO: Not yet implement
+        });
+
+        btForward.addActionListener(e -> {
+            String newPath = historyHelper.getNextHistory().getPath();
+            // TODO: Not yet implement
+        });
+
+        btUp.addActionListener(e -> {
+            historyHelper.pushBackHistory(PathUtils.getParentFolder(tfAddress.getText()));
+        });
     }
 
     private void setUpTextFieldActionListener() {
         tfAddress.addActionListener(e -> {
             String path = tfAddress.getText();
             System.out.println("Path: " + path);
-
-            /** TODO: Check if path is valid
-             * [CLEAR AFTER DONE]
-             * public boolean findText(String nodes) {
-             *         String[] parts = nodes.split(":");
-             *         TreePath path = null;
-             *         for (String part : parts) {
-             *             int row = (path==null ? 0 : tree.getRowForPath(path));
-             *             path = tree.getNextMatch(part, row, Position.Bias.Forward);
-             *             if (path==null) {
-             *                 return false;
-             *             }
-             *         }
-             *         tree.scrollPathToVisible(path);
-             *         tree.setSelectionPath(path);
-             *         return path!=null;
-             *     }
-             *  Hàm goToPath sẽ là boolean, đầu tiên cần kiểm tra xem đường dẫn có hợp lệ không,
-             *  sau đó mới thực hiện update JTree
-             *  <p>
-             *  Đường dẫn mới có thể trỏ tới 1 file hoặc 1 folder, nếu là folder thì sẽ cập nhật JTree
-             *  in đậm folder đó thể hiện là đang chọn
-             *  <p>
-             *  Nếu là file thì trỏ tới folder chứa file đó, như trên
-             */
 
             if (!treeHelper.goToPath(path)) {
                 JOptionPane.showMessageDialog(homePanel, "Invalid path");
@@ -123,7 +116,6 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
         tree = new JTree();
         tree.setToggleClickCount(1);
         tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        treeHelper = new TreeHelper(tree, this);
         treeHelper.initTree();
     }
 
