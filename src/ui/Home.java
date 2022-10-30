@@ -1,6 +1,8 @@
 package ui;
 
+
 import com.formdev.flatlaf.FlatDarculaLaf;
+import controller.table.TableHelper;
 import controller.historystack.HistoryHelper;
 import controller.treebrowse.TreeHelper;
 import utils.PathUtils;
@@ -9,13 +11,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class Home implements Runnable, TreeHelper.TreeCallbacks {
+public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.TableCallbacks {
     private JPanel homePanel;
     private JTree tree;
     private JButton btBack;
     private JButton btForward;
     private JButton btUp;
     private JTable tableCurrentFolder;
+
+    private TableHelper tableHelper;
+
     private JTextField tfAddress;
     private JButton btPicker;
     private final HistoryHelper historyHelper = new HistoryHelper();
@@ -57,6 +62,9 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
             System.out.println("Path: " + path);
 
             if (!treeHelper.goToPath(path)) {
+                JOptionPane.showMessageDialog(homePanel, "Invalid path");
+            }
+            if (!tableHelper.goToPath(path)) {
                 JOptionPane.showMessageDialog(homePanel, "Invalid path");
             }
         });
@@ -101,6 +109,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
     private void createUIComponents() {
         // TODO: place custom component creation code here
         setUpJTree();
+        setUpJTable();
     }
 
     private void setUpJTree() {
@@ -110,8 +119,22 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks {
         treeHelper.initTree();
     }
 
+    private void setUpJTable() {
+        tableCurrentFolder = new JTable();
+        tableHelper = new TableHelper(tableCurrentFolder, this);
+        tableHelper.initTable();
+
+    }
+
     @Override
     public void onTreeClicked(String newDir) {
         tfAddress.setText(newDir);
+        tableHelper.goToPath(newDir);
+    }
+
+    @Override
+    public void onTableClicked(String newDir) {
+        tfAddress.setText(newDir);
+        tableHelper.goToPath(newDir);
     }
 }

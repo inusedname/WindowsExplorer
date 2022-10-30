@@ -45,10 +45,6 @@
           </component>
         </children>
       </toolbar>
-      <component id="e4ea5" class="javax.swing.JTable" binding="tableCurrentFolder">
-        <constraints border-constraint="Center"/>
-        <properties/>
-      </component>
       <scrollpane id="edcee" binding="leftScrollPane">
         <constraints border-constraint="West"/>
         <properties>
@@ -62,6 +58,17 @@
               <editable value="false"/>
               <enabled value="true"/>
             </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <scrollpane id="8ce03">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="76d95" class="javax.swing.JTable" binding="tableCurrentFolder" custom-create="true">
+            <constraints/>
+            <properties/>
           </component>
         </children>
       </scrollpane>
