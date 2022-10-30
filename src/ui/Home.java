@@ -137,7 +137,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
     @Override
     public void onTreeClicked(String newDir) {
         tfAddress.setText(newDir);
-        tableHelper.setDir(newDir);
+
         tableHelper.goToPath(newDir);
     }
 
@@ -145,6 +145,6 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
     public void onTableClicked(String newDir) {
         tfAddress.setText(newDir);
         tableHelper.goToPath(newDir);
-        tableHelper.setDir(newDir);
+
     }
 }

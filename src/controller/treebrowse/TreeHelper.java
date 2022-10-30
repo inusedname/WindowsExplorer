@@ -1,17 +1,17 @@
 package controller.treebrowse;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.basic.BasicTreeUI;
-import javax.swing.table.DefaultTableModel;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
-import java.text.SimpleDateFormat;
+
 
 public class TreeHelper {
     private final JTree tree;
@@ -184,6 +184,7 @@ public class TreeHelper {
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+
             File file = (File) node.getUserObject();
             if (file == null) return label;
             label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -193,8 +194,11 @@ public class TreeHelper {
 
             if (selected) {
                 label.setBackground(backgroundSelectionColor);
+
+
             } else {
                 label.setBackground(backgroundNonSelectionColor);
+
             }
 
             return label;
