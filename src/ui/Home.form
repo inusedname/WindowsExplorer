@@ -18,18 +18,21 @@
           <component id="6e47" class="javax.swing.JButton" binding="btBack">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
           <component id="7fa5" class="javax.swing.JButton" binding="btForward">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
           <component id="430fd" class="javax.swing.JButton" binding="btUp">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
@@ -37,19 +40,9 @@
             <constraints/>
             <properties/>
           </component>
-          <component id="a1079" class="javax.swing.JButton" binding="btPicker">
-            <constraints/>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
         </children>
       </toolbar>
-      <component id="e4ea5" class="javax.swing.JTable" binding="tableCurrentFolder" custom-create="true">
-        <constraints border-constraint="Center"/>
-        <properties/>
-      </component>
-      <scrollpane id="edcee" binding="leftScrollPane">
+      <scrollpane id="edcee">
         <constraints border-constraint="West"/>
         <properties>
           <preferredSize width="200" height="400"/>
@@ -62,6 +55,17 @@
               <editable value="false"/>
               <enabled value="true"/>
             </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <scrollpane id="8ce03">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="76d95" class="javax.swing.JTable" binding="tableCurrentFolder" custom-create="true">
+            <constraints/>
+            <properties/>
           </component>
         </children>
       </scrollpane>

@@ -8,14 +8,17 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
 public class TreeHelper {
     private final JTree tree;
     final private TreeCallbacks callbacks;
+    TreePath submitTreePath;
     private FileSystemView fileSystemView;
     private DefaultMutableTreeNode root;
-    TreePath submitTreePath;
+
 
     public TreeHelper(JTree tree, TreeCallbacks callbacks) {
         this.tree = tree;
@@ -25,11 +28,10 @@ public class TreeHelper {
     public void initTree() {
         ((BasicTreeUI) tree.getUI()).setRightChildIndent(5);
         ((BasicTreeUI) tree.getUI()).setLeftChildIndent(3);
+        tree.setToggleClickCount(1);
+        tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         File[] rootDrive = File.listRoots();
-        for (File sysDrive : rootDrive) {
-            System.out.println("Drive : " + sysDrive);
-        }
         try {
             fileSystemView = FileSystemView.getFileSystemView();
             root = new DefaultMutableTreeNode();
@@ -43,12 +45,18 @@ public class TreeHelper {
             tree.setRootVisible(false);
             // tree GUI
             tree.setCellRenderer(new FileTreeCellRenderer());
-            tree.addTreeSelectionListener(e -> {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
-                if (node.isLeaf()) {
-                    addChildrenThenExpand(node);
+            tree.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+                    if (selPath == null)
+                        return;
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+                    if (node.isLeaf()) {
+                        addChildrenThenExpand(node);
+                    }
+                    callbacks.onTreeItemClicked(node.toString());
                 }
-                callbacks.onTreeClicked(node.toString());
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,20 +67,18 @@ public class TreeHelper {
         tree.setEnabled(false);
         File file = (File) node.getUserObject();
         if (file.isDirectory()) {
-            File[] files = fileSystemView.getFiles(file, true);
+            File[] files = fileSystemView.getFiles(file, false);
             if (node.isLeaf()) {
                 for (File child : files) {
-                    if (child.isDirectory()) {
+                    if (child.isDirectory() && !child.isHidden()) {
                         DefaultMutableTreeNode childnode = new DefaultMutableTreeNode(child);
                         node.add(childnode);
-
                     }
                 }
             }
         }
         tree.setEnabled(true);
     }
-
 
     private void addChildrenThenExpand(final DefaultMutableTreeNode node) {
         SwingWorker<String, Object> worker = new SwingWorker<>() {
@@ -91,7 +97,6 @@ public class TreeHelper {
             }
         };
         worker.execute();
-
     }
 
     private void addChildrenThenFindNextNode(final DefaultMutableTreeNode node, String[] pathList, int idx) {
@@ -111,7 +116,7 @@ public class TreeHelper {
 
     }
 
-    //from root node find scan all childnode and find one equal to path recursively
+    //from root node find scan all childNode and find one equal to path recursively
     public boolean goToPath(String path) {
         File file = new File(path);
         if (!file.exists()) {
@@ -151,7 +156,7 @@ public class TreeHelper {
         }
         boolean check = false;
         int nextIdx = idx;
-        DefaultMutableTreeNode nextNode = null;
+        DefaultMutableTreeNode nextNode;
         for (int i = 0; i < node.getChildCount(); i++) {
             nextNode = (DefaultMutableTreeNode) node.getChildAt(i);
             if (nextNode.toString().equals(pathList[idx])) {
@@ -167,21 +172,18 @@ public class TreeHelper {
                 break;
             }
         }
-        if (check) {
+        if (!check) {
             nextNode = (DefaultMutableTreeNode) node.getFirstChild();
             setTreePath(nextNode, pathList, nextIdx);
         }
-
     }
 
     public interface TreeCallbacks {
-        void onTreeClicked(String newDir);
+        void onTreeItemClicked(String newDir);
     }
 
     private static class FileTreeCellRenderer extends DefaultTreeCellRenderer {
-
         private final FileSystemView fileSystemView;
-
         private final JLabel label;
 
         FileTreeCellRenderer() {
