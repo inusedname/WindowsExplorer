@@ -5,19 +5,17 @@ public class PathUtils {
         if (path == null) {
             return null;
         }
+        path = path.substring(0, path.length() - 1);
         if (path.length() == 0) {
             return null;
         }
         if (path.length() == 1) {
             return null;
         }
-        if (path.charAt(path.length() - 1) == '/') {
-            path = path.substring(0, path.length() - 1);
-        }
-        int lastSlashIndex = path.lastIndexOf('/');
+        int lastSlashIndex = path.lastIndexOf('\\');
         if (lastSlashIndex == -1) {
             return null;
         }
-        return path.substring(0, lastSlashIndex);
+        return path.substring(0, lastSlashIndex + 1);
     }
 }

@@ -69,7 +69,7 @@ public class TableHelper {
                     String newDir = dir + "\\" + name;
                     File file = new File(newDir);
                     if (file.isDirectory()) {
-                        callbacks.onTableClicked(newDir);
+                        callbacks.onTableItemClicked(newDir);
                     }
                 }
             }
@@ -91,7 +91,7 @@ public class TableHelper {
     }
 
     public interface TableCallbacks {
-        void onTableClicked(String newDir);
+        void onTableItemClicked(String newDir);
     }
 
 }
