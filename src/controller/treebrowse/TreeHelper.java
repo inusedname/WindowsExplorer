@@ -172,10 +172,15 @@ public class TreeHelper {
                 break;
             }
         }
-        if (!check) {
-            nextNode = (DefaultMutableTreeNode) node.getFirstChild();
-            setTreePath(nextNode, pathList, nextIdx);
+        try {
+            if (!check) {
+                nextNode = (DefaultMutableTreeNode) node.getFirstChild();
+                setTreePath(nextNode, pathList, nextIdx);
+            }
+        } catch (Exception e) {
+            System.out.println("Siuuuuuuuuuu");
         }
+
     }
 
     public interface TreeCallbacks {

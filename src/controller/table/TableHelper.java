@@ -58,6 +58,7 @@ public class TableHelper {
         table.setAutoCreateRowSorter(true);
         scrollPane.setViewportView(table);
         model.setColumnIdentifiers(HEADER);
+        table.setDefaultEditor(Object.class,null);
         table.setModel(model);
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
@@ -65,12 +66,16 @@ public class TableHelper {
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 String name = String.valueOf(table.getValueAt(row, 0));
-                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     String newDir = dir + "\\" + name;
                     File file = new File(newDir);
                     if (file.isDirectory()) {
                         callbacks.onTableItemClicked(newDir);
                     }
+                }
+                if(mouseEvent.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
+                    PopupMenu menu = new TableRowPopupMenu();
+                    menu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
                 }
             }
         });

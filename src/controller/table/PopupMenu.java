@@ -1,4 +1,4 @@
-package ui.popupmenu;
+package controller.table;
 
 import javax.swing.*;
 
