@@ -18,18 +18,21 @@
           <component id="6e47" class="javax.swing.JButton" binding="btBack">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
           <component id="7fa5" class="javax.swing.JButton" binding="btForward">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
           <component id="430fd" class="javax.swing.JButton" binding="btUp">
             <constraints/>
             <properties>
+              <enabled value="true"/>
               <text value=""/>
             </properties>
           </component>
@@ -37,15 +40,9 @@
             <constraints/>
             <properties/>
           </component>
-          <component id="a1079" class="javax.swing.JButton" binding="btPicker">
-            <constraints/>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
         </children>
       </toolbar>
-      <scrollpane id="edcee" binding="leftScrollPane">
+      <scrollpane id="edcee">
         <constraints border-constraint="West"/>
         <properties>
           <preferredSize width="200" height="400"/>
@@ -72,6 +69,24 @@
           </component>
         </children>
       </scrollpane>
+      <toolbar id="ecfbb">
+        <constraints border-constraint="South"/>
+        <properties>
+          <floatable value="false"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <hspacer id="e585f">
+            <constraints/>
+          </hspacer>
+          <component id="1c2c8" class="javax.swing.JButton" binding="btBuyMeACoffee">
+            <constraints/>
+            <properties>
+              <text value="Buy me a coffee"/>
+            </properties>
+          </component>
+        </children>
+      </toolbar>
     </children>
   </grid>
 </form>

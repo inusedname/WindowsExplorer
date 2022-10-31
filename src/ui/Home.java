@@ -2,78 +2,90 @@ package ui;
 
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import controller.historystack.HistoryHelper;
 import controller.table.TableHelper;
 import controller.treebrowse.TreeHelper;
+import utils.PathUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.Objects;
 
-public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.TableCallbacks {
+public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.TableCallbacks {
+    private final HistoryHelper historyHelper;
     private JPanel homePanel;
     private JTree tree;
+    private TreeHelper treeHelper;
     private JButton btBack;
     private JButton btForward;
     private JButton btUp;
     private JTable tableCurrentFolder;
-
-    private  TableHelper tableHelper;
-
+    private TableHelper tableHelper;
     private JTextField tfAddress;
-    private JButton btPicker;
-    private JScrollPane leftScrollPane;
-
-    private TreeHelper treeHelper;
+    private JButton btBuyMeACoffee;
 
     public Home() {
+        historyHelper = new HistoryHelper();
         setUpUI();
         setUpActionListeners();
+        setUpObservers();
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Home());
     }
 
+    private void setUpObservers() {
+        historyHelper.addHistoryChangeListener(evt -> {
+            if (evt.getPropertyName().equals("currentHistory")) {
+                System.out.println("History changed");
+                int newHistoryIndex = (int) evt.getNewValue();
+                btBack.setEnabled(newHistoryIndex > 0);
+                btForward.setEnabled(newHistoryIndex < historyHelper.getHistoryStackSize() - 1);
+                btUp.setEnabled(PathUtils.getParentFolder(historyHelper.getCurrentHistory().getPath()) != null);
+            }
+        });
+    }
+
     private void setUpActionListeners() {
         setUpTextFieldActionListener();
+        setUpNavigationBarActionListener();
+        setUpBottomBarActionListener();
+    }
+
+    private void setUpBottomBarActionListener() {
+        btBuyMeACoffee.addActionListener(e -> {
+            BuyMeACoffeeDialog dialog = new BuyMeACoffeeDialog();
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        });
+    }
+
+    private void setUpNavigationBarActionListener() {
+        btBack.addActionListener(e -> {
+            String newPath = historyHelper.goToPreviousHistory().getPath();
+            updateTreeTableAndTF(newPath);
+        });
+
+        btForward.addActionListener(e -> {
+            String newPath = historyHelper.goToNextHistory().getPath();
+            updateTreeTableAndTF(newPath);
+        });
+
+        btUp.addActionListener(e -> {
+            String newPath = PathUtils.getParentFolder(tfAddress.getText());
+            if (updateTreeTableAndTF(newPath)) {
+                historyHelper.pushBackHistory(newPath);
+            }
+        });
     }
 
     private void setUpTextFieldActionListener() {
         tfAddress.addActionListener(e -> {
-            String path = tfAddress.getText();
-            System.out.println("Path: " + path);
-
-            /** TODO: Check if path is valid
-             * [CLEAR AFTER DONE]
-             * public boolean findText(String nodes) {
-             *         String[] parts = nodes.split(":");
-             *         TreePath path = null;
-             *         for (String part : parts) {
-             *             int row = (path==null ? 0 : tree.getRowForPath(path));
-             *             path = tree.getNextMatch(part, row, Position.Bias.Forward);
-             *             if (path==null) {
-             *                 return false;
-             *             }
-             *         }
-             *         tree.scrollPathToVisible(path);
-             *         tree.setSelectionPath(path);
-             *         return path!=null;
-             *     }
-             *  Hàm goToPath sẽ là boolean, đầu tiên cần kiểm tra xem đường dẫn có hợp lệ không,
-             *  sau đó mới thực hiện update JTree
-             *  <p>
-             *  Đường dẫn mới có thể trỏ tới 1 file hoặc 1 folder, nếu là folder thì sẽ cập nhật JTree
-             *  in đậm folder đó thể hiện là đang chọn
-             *  <p>
-             *  Nếu là file thì trỏ tới folder chứa file đó, như trên
-             */
-
-            if (!treeHelper.goToPath(path)) {
-                JOptionPane.showMessageDialog(homePanel, "Invalid path");
-            }
-            if (!tableHelper.goToPath(path))
-            {
-                JOptionPane.showMessageDialog(homePanel, "Invalid path");
+            if (updateTreeTableAndTF(tfAddress.getText())) {
+                historyHelper.pushBackHistory(tfAddress.getText());
             }
         });
     }
@@ -98,53 +110,71 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks,TableHelper.Tabl
         }
 
         homePanel.setPreferredSize(new Dimension(1280, 720));
+        btBack.setEnabled(false);
+        btForward.setEnabled(false);
+        btUp.setEnabled(false);
         setUpIcons();
     }
 
     private void setUpIcons() {
 
-        ImageIcon iconBack = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_back.png")));
+        ImageIcon iconBack = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_back_1.png")));
         ImageIcon iconForward = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_forward.png")));
         ImageIcon iconUp = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_up.png")));
-        ImageIcon iconPicker = new ImageIcon(Objects.requireNonNull(getClass().getResource("/res/drawable/ic_open_folder.png")));
 
         btBack.setIcon(iconBack);
         btForward.setIcon(iconForward);
         btUp.setIcon(iconUp);
-        btPicker.setIcon(iconPicker);
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         setUpJTree();
         setUpJTable();
     }
 
     private void setUpJTree() {
         tree = new JTree();
-        tree.setToggleClickCount(1);
-        tree.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         treeHelper = new TreeHelper(tree, this);
         treeHelper.initTree();
     }
 
     private void setUpJTable() {
         tableCurrentFolder = new JTable();
-        tableHelper = new TableHelper(tableCurrentFolder,this);
+        tableHelper = new TableHelper(tableCurrentFolder, this);
         tableHelper.initTable();
-
-    }
-    @Override
-    public void onTreeClicked(String newDir) {
-        tfAddress.setText(newDir);
-
-        tableHelper.goToPath(newDir);
     }
 
     @Override
-    public void onTableClicked(String newDir) {
-        tfAddress.setText(newDir);
-        tableHelper.goToPath(newDir);
+    public void onTreeItemClicked(String newDir) {
+        if (tableHelper.goToPath(newDir)) {
+            tfAddress.setText(newDir);
+            historyHelper.pushBackHistory(newDir);
+        }
+    }
 
+    @Override
+    public void onTableFolderClicked(String newDir) {
+        if (updateTreeTableAndTF(newDir)) {
+            System.out.println("Hello1");
+            historyHelper.pushBackHistory(newDir);
+        }
+    }
+
+    @Override
+    public void onTableFileClicked(String newDir) {
+
+    }
+
+    private boolean updateTreeTableAndTF(String newDir) {
+        if (!new File(newDir).exists()) {
+            JOptionPane.showMessageDialog(homePanel, "Invalid path");
+            return false;
+        }
+        if (tableHelper.goToPath(newDir)) {
+            tfAddress.setText(newDir);
+            treeHelper.goToPath(newDir);
+            return true;
+        }
+        return false;
     }
 }
