@@ -112,7 +112,6 @@ public class TableHelper {
 
     public interface TableCallbacks {
         void onTableFolderClicked(String newDir);
-
         void onTableFileClicked(String newDir);
     }
 
