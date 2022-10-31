@@ -69,6 +69,24 @@
           </component>
         </children>
       </scrollpane>
+      <toolbar id="ecfbb">
+        <constraints border-constraint="South"/>
+        <properties>
+          <floatable value="false"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <hspacer id="e585f">
+            <constraints/>
+          </hspacer>
+          <component id="1c2c8" class="javax.swing.JButton" binding="btBuyMeACoffee">
+            <constraints/>
+            <properties>
+              <text value="Buy me a coffee"/>
+            </properties>
+          </component>
+        </children>
+      </toolbar>
     </children>
   </grid>
 </form>
