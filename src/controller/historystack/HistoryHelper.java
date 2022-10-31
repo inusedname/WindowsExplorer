@@ -15,9 +15,7 @@ public class HistoryHelper {
     }
 
     public void pushBackHistory(HistoryNode node) {
-        if (!new File(node.getPath()).exists() ||
-                (historyStack.size() > 0 &&
-                        historyStack.get(historyStack.size() - 1).getPath().equals(node.getPath()))) {
+        if (!new File(node.getPath()).exists()) {
             return;
         }
         while (historyStack.size() - 1 != current.getIndex()) {
@@ -25,6 +23,11 @@ public class HistoryHelper {
         }
         historyStack.add(node);
         current.setIndex(current.getIndex() + 1);
+
+//        for (HistoryNode historyNode : historyStack) {
+//            System.out.printf("%s ", historyNode.getPath());
+//        }
+//        System.out.println();
     }
 
     public void pushBackHistory(String path) {

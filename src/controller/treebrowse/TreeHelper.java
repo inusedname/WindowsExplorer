@@ -178,7 +178,7 @@ public class TreeHelper {
                 setTreePath(nextNode, pathList, nextIdx);
             }
         } catch (Exception e) {
-            System.out.println("Siuuuuuuuuuu");
+            System.out.println(e.getMessage());
         }
 
     }

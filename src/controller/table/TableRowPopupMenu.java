@@ -1,9 +1,9 @@
 package controller.table;
 
-import java.awt.*;
+import ui.FilePropertyDialog;
 
 public class TableRowPopupMenu extends PopupMenu {
-    public TableRowPopupMenu() {
+    public TableRowPopupMenu(String path) {
         add("Cut").addActionListener(e -> {
 
         });
@@ -18,6 +18,12 @@ public class TableRowPopupMenu extends PopupMenu {
         });
         add("Rename").addActionListener(e -> {
 
+        });
+        add("Properties").addActionListener(e -> {
+            FilePropertyDialog dialog = new FilePropertyDialog(path);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         });
     }
 }
