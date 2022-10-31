@@ -3,9 +3,7 @@ package controller.table;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
-
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,7 +17,7 @@ public class TableHelper {
     private final String[] HEADER = new String[]{"Name", "Date modified", "Type", "Size"};
     public DefaultTableModel model = new DefaultTableModel();
     private String dir = "";
-    
+
     public TableHelper(JTable table, TableCallbacks callbacks) {
         this.table = table;
         this.callbacks = callbacks;
@@ -53,11 +51,12 @@ public class TableHelper {
             }
             SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             String misclassified = date.format(files.lastModified());
-            tb.addRow(new Object[] { new JLabel(name), misclassified, type, size });
+            tb.addRow(new Object[]{new JLabel(name), misclassified, type, size});
         }
 
         return tb;
     }
+
     public void initTable() {
 
         JScrollPane scrollPane = new JScrollPane();
@@ -91,6 +90,7 @@ public class TableHelper {
             }
         });
     }
+
     public boolean goToPath(String path) {
         dir = path;
         File file = new File(path);
@@ -107,35 +107,37 @@ public class TableHelper {
         model = createTableData(file.toString());
         table.setModel(model);
         table.getColumnModel().getColumn(0).setCellRenderer(new Renderer());
+        return true;
     }
 
     public interface TableCallbacks {
         void onTableFolderClicked(String newDir);
+
         void onTableFileClicked(String newDir);
     }
 
-    private class Renderer extends DefaultTableCellRenderer
-    {
+    private class Renderer extends DefaultTableCellRenderer {
         private final FileSystemView fileSystemView;
         private final JLabel label;
+
         private Renderer() {
             label = new JLabel();
             fileSystemView = FileSystemView.getFileSystemView();
         }
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
             File folder = new File(dir);
 
             File[] files = folder.listFiles();
-            if (files[row] == null)
-            {
+            if (files[row] == null) {
                 return label;
             }
             label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
             label.setIcon(fileSystemView.getSystemIcon(files[row]));
             label.setText(fileSystemView.getSystemDisplayName(files[row]));
-            label.setBackground(new Color(70,73,75));
+            label.setBackground(new Color(70, 73, 75));
             return label;
         }
     }

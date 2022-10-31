@@ -49,8 +49,7 @@ public class TreeHelper {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-                    if (selPath == null)
-                        return;
+                    if (selPath == null) return;
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
                     if (node.isLeaf()) {
                         addChildrenThenExpand(node);
@@ -201,23 +200,17 @@ public class TreeHelper {
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-
             File file = (File) node.getUserObject();
             if (file == null) return label;
             label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
             label.setIcon(fileSystemView.getSystemIcon(file));
             label.setText(fileSystemView.getSystemDisplayName(file));
             label.setToolTipText(file.getPath());
-
             if (selected) {
                 label.setBackground(backgroundSelectionColor);
-
-
             } else {
                 label.setBackground(backgroundNonSelectionColor);
-
             }
-
             return label;
         }
     }
