@@ -23,6 +23,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
     private JTable tableCurrentFolder;
     private TableHelper tableHelper;
     private JTextField tfAddress;
+    private JButton btBuyMeACoffee;
 
     public Home() {
         historyHelper = new HistoryHelper();
@@ -38,6 +39,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
     private void setUpObservers() {
         historyHelper.addHistoryChangeListener(evt -> {
             if (evt.getPropertyName().equals("currentHistory")) {
+                System.out.println("History changed");
                 int newHistoryIndex = (int) evt.getNewValue();
                 btBack.setEnabled(newHistoryIndex > 0);
                 btForward.setEnabled(newHistoryIndex < historyHelper.getHistoryStackSize() - 1);
@@ -49,6 +51,16 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
     private void setUpActionListeners() {
         setUpTextFieldActionListener();
         setUpNavigationBarActionListener();
+        setUpBottomBarActionListener();
+    }
+
+    private void setUpBottomBarActionListener() {
+        btBuyMeACoffee.addActionListener(e -> {
+            BuyMeACoffeeDialog dialog = new BuyMeACoffeeDialog();
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        });
     }
 
     private void setUpNavigationBarActionListener() {
@@ -63,15 +75,18 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
         });
 
         btUp.addActionListener(e -> {
-            historyHelper.pushBackHistory(PathUtils.getParentFolder(tfAddress.getText()));
-            updateTreeTableAndTF(historyHelper.getCurrentHistory().getPath());
+            String newPath = PathUtils.getParentFolder(tfAddress.getText());
+            if (updateTreeTableAndTF(newPath)) {
+                historyHelper.pushBackHistory(newPath);
+            }
         });
     }
 
     private void setUpTextFieldActionListener() {
         tfAddress.addActionListener(e -> {
-            historyHelper.pushBackHistory(tfAddress.getText());
-            updateTreeTableAndTF(tfAddress.getText());
+            if (updateTreeTableAndTF(tfAddress.getText())) {
+                historyHelper.pushBackHistory(tfAddress.getText());
+            }
         });
     }
 
@@ -131,25 +146,35 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
 
     @Override
     public void onTreeItemClicked(String newDir) {
-        historyHelper.pushBackHistory(newDir);
-        tfAddress.setText(newDir);
-        tableHelper.goToPath(newDir);
+        if (tableHelper.goToPath(newDir)) {
+            tfAddress.setText(newDir);
+            historyHelper.pushBackHistory(newDir);
+        }
     }
 
     @Override
-    public void onTableItemClicked(String newDir) {
-        historyHelper.pushBackHistory(newDir);
-        tfAddress.setText(newDir);
-        treeHelper.goToPath(newDir);
+    public void onTableFolderClicked(String newDir) {
+        if (updateTreeTableAndTF(newDir)) {
+            System.out.println("Hello1");
+            historyHelper.pushBackHistory(newDir);
+        }
     }
 
-    private void updateTreeTableAndTF(String newDir) {
+    @Override
+    public void onTableFileClicked(String newDir) {
+
+    }
+
+    private boolean updateTreeTableAndTF(String newDir) {
         if (!new File(newDir).exists()) {
             JOptionPane.showMessageDialog(homePanel, "Invalid path");
-            return;
+            return false;
         }
-        tfAddress.setText(newDir);
-        treeHelper.goToPath(newDir);
-        tableHelper.goToPath(newDir);
+        if (tableHelper.goToPath(newDir)) {
+            tfAddress.setText(newDir);
+            treeHelper.goToPath(newDir);
+            return true;
+        }
+        return false;
     }
 }
