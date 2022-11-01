@@ -55,7 +55,7 @@ public class TreeHelper {
                     if (node.isLeaf()) {
                         addChildrenThenExpand(node);
                     }
-                    callbacks.onTreeItemClicked(node.toString());
+                    callbacks.onTreeItemClicked(node.toString() + "\\");
                 }
             });
         } catch (Exception e) {
