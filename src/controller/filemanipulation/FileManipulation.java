@@ -4,6 +4,13 @@ import java.io.*;
 
 public class FileManipulation {
 
+    public enum TmpMode {
+        COPY, CUT
+    }
+
+    public static String tmpPath = null;
+    public static TmpMode tmpMode = null;
+
     public boolean deleteFile(String path) {
         try {
             return new File(path).delete();
