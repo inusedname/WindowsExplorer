@@ -50,4 +50,8 @@ public class FileProperty {
         data[4][1] = read_write_execute[0] + "/" + read_write_execute[1] + "/" + read_write_execute[2];
         return data;
     }
+
+    public String getName(){
+        return name;
+    }
 }

@@ -1,28 +1,39 @@
 package controller.table;
 
 import controller.filemanipulation.FileManipulation;
+import controller.filemanipulation.FileProperty;
 import ui.FilePropertyDialog;
+import ui.MoveFileDialog;
+import ui.RenameFileDialog;
 
 public class TableRowPopupMenu extends PopupMenu {
     public TableRowPopupMenu(String path) {
+        FileProperty file = new FileProperty(path);
         add("Cut").addActionListener(e -> {
+            FileManipulation.tmpName = file.getName();
             FileManipulation.tmpPath = path;
             FileManipulation.tmpMode = FileManipulation.TmpMode.CUT;
-            // TODO: Not yet implement
         });
         add("Move").addActionListener(e -> {
-            // TODO: Not yet implement
+            MoveFileDialog dialog = new MoveFileDialog(path,file.getName());
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         });
         add("Copy").addActionListener(e -> {
+            FileManipulation.tmpName = file.getName();
             FileManipulation.tmpPath = path;
             FileManipulation.tmpMode = FileManipulation.TmpMode.COPY;
-            // TODO: Not yet implement
         });
         add("Delete").addActionListener(e -> {
-            // TODO: Not yet implement
+            FileManipulation fileManipulation = new FileManipulation();
+            fileManipulation.deleteFile(path);
         });
         add("Rename").addActionListener(e -> {
-            // TODO: Not yet implement
+            RenameFileDialog dialog = new RenameFileDialog(path,file.getName());
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         });
         add("Properties").addActionListener(e -> {
             FilePropertyDialog dialog = new FilePropertyDialog(path);
@@ -30,22 +41,23 @@ public class TableRowPopupMenu extends PopupMenu {
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
         });
-        addPasteOptionIfAvailable();
+        addPasteOptionIfAvailable(path+FileManipulation.tmpName);
     }
 
-    public void addPasteOptionIfAvailable() {
+    public void addPasteOptionIfAvailable(String path) {
         boolean available = FileManipulation.tmpMode != null && FileManipulation.tmpPath != null;
         if (available) {
             add("Paste").addActionListener(e -> {
                 switch (FileManipulation.tmpMode) {
                     case CUT -> {
-                        // 1
+                        FileManipulation fileManipulation = new FileManipulation();
+                        fileManipulation.moveFile(FileManipulation.tmpPath,path);
                     }
                     case COPY -> {
-                        // 2
+                        FileManipulation fileManipulation = new FileManipulation();
+                        fileManipulation.copyFile(FileManipulation.tmpPath,path);
                     }
                 }
-                // TODO: Not yet implemented
                 FileManipulation.tmpPath = null;
                 FileManipulation.tmpMode = null;
             });

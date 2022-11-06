@@ -9,6 +9,7 @@ public class FileManipulation {
     }
 
     public static String tmpPath = null;
+    public static String tmpName = null;
     public static TmpMode tmpMode = null;
 
     public boolean deleteFile(String path) {
