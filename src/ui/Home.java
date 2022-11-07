@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import controller.historystack.HistoryHelper;
 import controller.table.TableHelper;
 import controller.treebrowse.TreeHelper;
+import interfaces.FileManipulationDialogCallback;
 import utils.PathUtils;
 
 import javax.swing.*;
@@ -12,7 +13,10 @@ import java.awt.*;
 import java.io.File;
 import java.util.Objects;
 
-public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.TableCallbacks {
+public class Home implements Runnable,
+        TreeHelper.TreeCallbacks,
+        TableHelper.TableCallbacks,
+        FileManipulationDialogCallback {
     private final HistoryHelper historyHelper;
     private JPanel homePanel;
     private JTree tree;
@@ -39,7 +43,6 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
     private void setUpObservers() {
         historyHelper.addHistoryChangeListener(evt -> {
             if (evt.getPropertyName().equals("currentHistory")) {
-                System.out.println("History changed");
                 int newHistoryIndex = (int) evt.getNewValue();
                 btBack.setEnabled(newHistoryIndex > 0);
                 btForward.setEnabled(newHistoryIndex < historyHelper.getHistoryStackSize() - 1);
@@ -84,8 +87,10 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
 
     private void setUpTextFieldActionListener() {
         tfAddress.addActionListener(e -> {
-            if (updateTreeTableAndTF(tfAddress.getText())) {
-                historyHelper.pushBackHistory(tfAddress.getText());
+            File file = new File(tfAddress.getText());
+            if (!file.isDirectory()) file = file.getParentFile();
+            if (updateTreeTableAndTF(file.toString() + "\\")) {
+                historyHelper.pushBackHistory(file + "\\");
             }
         });
     }
@@ -140,7 +145,7 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
 
     private void setUpJTable() {
         tableCurrentFolder = new JTable();
-        tableHelper = new TableHelper(tableCurrentFolder, this);
+        tableHelper = new TableHelper(tableCurrentFolder, this, this);
         tableHelper.initTable();
     }
 
@@ -176,5 +181,11 @@ public class Home implements Runnable, TreeHelper.TreeCallbacks, TableHelper.Tab
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onOk() {
+        tableHelper.goToPath(historyHelper.getCurrentHistory().getPath());
+        treeHelper.goToPath(historyHelper.getCurrentHistory().getPath());
     }
 }

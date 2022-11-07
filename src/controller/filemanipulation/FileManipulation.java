@@ -1,73 +1,51 @@
 package controller.filemanipulation;
 
-import java.io.*;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class FileManipulation {
 
-    public enum TmpMode {
-        COPY, CUT
-    }
-
     public static String tmpPath = null;
+    public static String tmpName = null;
     public static TmpMode tmpMode = null;
 
-    public boolean deleteFile(String path) {
+    public static void deleteFile(String path) {
         try {
-            return new File(path).delete();
-        } catch (Exception ignored) {
+            new File(path).delete();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
-    public boolean renameFile(String oldPath, String newPath) {
+    public static void renameFile(String oldPath, String newPath) {
         try {
-            return new File(oldPath).renameTo(new File(newPath));
-        } catch (Exception ignored) {
+            new File(oldPath).renameTo(new File(newPath));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
-    public boolean moveFile(String oldPath, String newPath) {
-        InputStream in;
-        OutputStream out;
+    public static void moveFile(String oldPath, String newPath) {
         try {
-            in = new FileInputStream(oldPath);
-            out = new FileOutputStream(newPath);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-            out.close();
-
-            return new File(oldPath).delete();
-        } catch (Exception ignored) {
+            Files.createDirectories(new File(newPath).toPath().getParent());
+            Files.move(new File(oldPath).toPath(), new File(newPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
-    public void copyFile(String oldPath, String newPath) {
-
-        InputStream in;
-        OutputStream out;
+    public static void copyFile(String oldPath, String newPath) {
         try {
-            in = new FileInputStream(oldPath);
-            out = new FileOutputStream(newPath);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-            out.close();
+            Files.createDirectories(new File(newPath).toPath().getParent());
+            Files.copy(new File(oldPath).toPath(), new File(newPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         } catch (Exception ignored) {
         }
+    }
+
+    public enum TmpMode {
+        COPY, CUT
     }
 }
 

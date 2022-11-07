@@ -55,7 +55,11 @@ public class TreeHelper {
                     if (node.isLeaf()) {
                         addChildrenThenExpand(node);
                     }
-                    callbacks.onTreeItemClicked(node.toString() + "\\");
+                    String newPath = node.toString();
+                    if (!newPath.endsWith("\\")) {
+                        newPath += '\\';
+                    }
+                    callbacks.onTreeItemClicked(newPath);
                 }
             });
         } catch (Exception e) {
@@ -117,10 +121,10 @@ public class TreeHelper {
     }
 
     //from root node find scan all childNode and find one equal to path recursively
-    public boolean goToPath(String path) {
+    public void goToPath(String path) {
         File file = new File(path);
         if (!file.exists()) {
-            return false;
+            return;
         }
 
         //Only show the closest folder (tree not show file)
@@ -142,7 +146,6 @@ public class TreeHelper {
             pathList[len] = file.toString();
         }
         setTreePath(root, pathList, 0);
-        return true;
     }
 
     public void setTreePath(DefaultMutableTreeNode node, String[] pathList, int idx) {

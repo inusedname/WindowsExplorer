@@ -1,51 +1,58 @@
 package controller.table;
 
 import controller.filemanipulation.FileManipulation;
+import interfaces.FileManipulationDialogCallback;
 import ui.FilePropertyDialog;
+import ui.MoveFileDialog;
+import ui.RenameFileDialog;
+import utils.PathUtils;
 
 public class TableRowPopupMenu extends PopupMenu {
-    public TableRowPopupMenu(String path) {
+
+    private final FileManipulationDialogCallback callback;
+
+    public TableRowPopupMenu(String path, FileManipulationDialogCallback callback) {
+        this.callback = callback;
         add("Cut").addActionListener(e -> {
+            FileManipulation.tmpName = PathUtils.getFileName(path);
             FileManipulation.tmpPath = path;
             FileManipulation.tmpMode = FileManipulation.TmpMode.CUT;
-            // TODO: Not yet implement
         });
         add("Move").addActionListener(e -> {
-            // TODO: Not yet implement
+            MoveFileDialog dialog = new MoveFileDialog(path, this.callback);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         });
         add("Copy").addActionListener(e -> {
+            FileManipulation.tmpName = PathUtils.getFileName(path);
             FileManipulation.tmpPath = path;
             FileManipulation.tmpMode = FileManipulation.TmpMode.COPY;
-            // TODO: Not yet implement
         });
-        add("Delete").addActionListener(e -> {
-            // TODO: Not yet implement
-        });
+        add("Delete").addActionListener(e -> FileManipulation.deleteFile(path));
         add("Rename").addActionListener(e -> {
-            // TODO: Not yet implement
+            RenameFileDialog dialog = new RenameFileDialog(path, this.callback);
+            dialog.pack();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
         });
+        addPasteOption(path + FileManipulation.tmpName);
         add("Properties").addActionListener(e -> {
             FilePropertyDialog dialog = new FilePropertyDialog(path);
             dialog.pack();
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
         });
-        addPasteOptionIfAvailable();
     }
 
-    public void addPasteOptionIfAvailable() {
+    public void addPasteOption(String path) {
         boolean available = FileManipulation.tmpMode != null && FileManipulation.tmpPath != null;
         if (available) {
             add("Paste").addActionListener(e -> {
                 switch (FileManipulation.tmpMode) {
-                    case CUT -> {
-                        // 1
-                    }
-                    case COPY -> {
-                        // 2
-                    }
+                    case CUT -> FileManipulation.moveFile(FileManipulation.tmpPath, path);
+                    case COPY -> FileManipulation.copyFile(FileManipulation.tmpPath, path);
                 }
-                // TODO: Not yet implemented
                 FileManipulation.tmpPath = null;
                 FileManipulation.tmpMode = null;
             });
