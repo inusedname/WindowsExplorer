@@ -1,74 +1,57 @@
 package ui;
 
 import controller.filemanipulation.FileManipulation;
+import interfaces.FileManipulationDialogCallback;
+import utils.PathUtils;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.*;
 
 public class MoveFileDialog extends JDialog {
 
-    private final String oldPath;
+    private final String oldParentPath;
     private final String fileName;
-    private String newPath;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField textFieldNewPath;
     private JTextField textFieldOldPath;
-    private JTextPane textOldPath;
-    private JTextPane textNewPath;
 
-    public MoveFileDialog(String oldPath, String fileName) {
-        this.oldPath = oldPath;
-        this.fileName = fileName;
-        textFieldOldPath.setText(oldPath);
-        textOldPath.setText("Old Path");
-        textNewPath.setText("New Path");
+    private final FileManipulationDialogCallback callbacks;
+
+    public MoveFileDialog(String oldPath, FileManipulationDialogCallback callbacks) {
+        this.callbacks = callbacks;
+        this.oldParentPath = PathUtils.getParentFolder(oldPath);
+        this.fileName = PathUtils.getFileName(oldPath);
+        textFieldOldPath.setText(oldParentPath);
+        textFieldNewPath.setText(oldParentPath);
+
         setContentPane(contentPane);
+        if (PathUtils.isDirectory(oldPath)) {
+            setTitle("Move directory - " + fileName);
+        } else {
+            setTitle("Move file - " + fileName);
+        }
+        setPreferredSize(new Dimension(500, 200));
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        buttonOK.addActionListener(e -> onOK());
+        buttonCancel.addActionListener(e -> onCancel());
     }
 
     private void onOK() {
-        // add your code here
-        if(textFieldNewPath.getText()!=null){
-            newPath = textFieldNewPath.getText();
-            FileManipulation fileManipulation = new FileManipulation();
-            fileManipulation.moveFile(oldPath,(newPath+fileName));
+        if (textFieldNewPath.getText() != null && !textFieldNewPath.getText().isEmpty()) {
+            String newPath = textFieldNewPath.getText();
+            FileManipulation.moveFile(oldParentPath + fileName, newPath + "\\" + fileName);
+            callbacks.onOk();
+            dispose();
+        } else {
+            textFieldNewPath.requestFocus();
         }
-        dispose();
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
-
 }

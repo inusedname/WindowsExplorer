@@ -15,7 +15,6 @@ public class FileProperty {
 
     public FileProperty(String path) {
         this.path = path;
-        System.out.println(path);
         readProperties();
     }
 
@@ -43,15 +42,11 @@ public class FileProperty {
         data[1][0] = "Type";
         data[1][1] = typeAndExtension;
         data[2][0] = "Size";
-        data[2][1] = size;
+        data[2][1] = size + " B";
         data[3][0] = "Last Modified";
         data[3][1] = lastModifiedDate;
         data[4][0] = "Read/Write/Execute";
         data[4][1] = read_write_execute[0] + "/" + read_write_execute[1] + "/" + read_write_execute[2];
         return data;
-    }
-
-    public String getName(){
-        return name;
     }
 }

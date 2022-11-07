@@ -29,4 +29,14 @@ public class PathUtils {
         }
         return name.substring(lastDotIndex + 1);
     }
+
+    public static boolean isDirectory(String path) {
+        File file = new File(path);
+        return file.isDirectory();
+    }
+
+    public static String getFileName(String path) {
+        File file = new File(path);
+        return file.getName();
+    }
 }
