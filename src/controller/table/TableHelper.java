@@ -3,8 +3,10 @@ package controller.table;
 import interfaces.FileManipulationDialogCallback;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -53,8 +55,9 @@ public class TableHelper {
             }
             SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             String misclassified = date.format(files.lastModified());
-            tb.addRow(new Object[]{name, misclassified, type, size});
+            tb.addRow(new Object[]{files, misclassified, type, size});
         }
+
         return tb;
     }
 
@@ -66,24 +69,23 @@ public class TableHelper {
         table.setFillsViewportHeight(true);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setShowGrid(false);
-        table.setAutoCreateRowSorter(true);
         ((DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer())
                 .setHorizontalAlignment(JLabel.LEFT);
         scrollPane.setViewportView(table);
         model.setColumnIdentifiers(HEADER);
+        table.setAutoCreateRowSorter(true);
         table.setDefaultEditor(Object.class, null);
         table.setModel(model);
+
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
                 String newDir;
-                if (table.getSelectedRow() != -1) {
-                    String name = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
-                    newDir = String.format("%s%s\\", dir, name);
-                }
-                else {
+                if (table.rowAtPoint(mouseEvent.getPoint()) != -1) {
+                    String path = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
+                    newDir = String.format("%s\\", path);
+                } else {
                     newDir = dir;
                 }
-
                 if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     File file = new File(newDir);
                     if (file.isDirectory()) {
@@ -115,12 +117,33 @@ public class TableHelper {
         }
         model = createTableData(file.toString());
         table.setModel(model);
+        table.getColumnModel().getColumn(0).setCellRenderer(new Renderer());
         return true;
     }
 
     public interface TableCallbacks {
         void onTableFolderClicked(String newDir);
+
         void onTableFileClicked(String newDir);
     }
 
+    private static class Renderer extends DefaultTableCellRenderer {
+        private final FileSystemView fileSystemView;
+
+        private Renderer() {
+            fileSystemView = FileSystemView.getFileSystemView();
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            File file = (File) value;
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+            label.setIcon(fileSystemView.getSystemIcon(file));
+            label.setText(fileSystemView.getSystemDisplayName(file));
+            return label;
+        }
+
+
+    }
 }

@@ -49,8 +49,7 @@ public class TreeHelper {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-                    if (selPath == null)
-                        return;
+                    if (selPath == null) return;
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
                     if (node.isLeaf()) {
                         addChildrenThenExpand(node);
@@ -210,13 +209,11 @@ public class TreeHelper {
             label.setIcon(fileSystemView.getSystemIcon(file));
             label.setText(fileSystemView.getSystemDisplayName(file));
             label.setToolTipText(file.getPath());
-
             if (selected) {
                 label.setBackground(backgroundSelectionColor);
             } else {
                 label.setBackground(backgroundNonSelectionColor);
             }
-
             return label;
         }
     }
