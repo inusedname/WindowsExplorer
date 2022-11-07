@@ -80,7 +80,7 @@ public class TableHelper {
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
                 String newDir;
-                if (table.getSelectedRow() != -1) {
+                if (table.rowAtPoint(mouseEvent.getPoint()) != -1) {
                     String path = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
                     newDir = String.format("%s\\", path);
                 } else {
