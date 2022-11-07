@@ -51,7 +51,7 @@ public class TableHelper {
             }
             SimpleDateFormat date = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             String misclassified = date.format(files.lastModified());
-            tb.addRow(new Object[]{new JLabel(name), misclassified, type, size});
+            tb.addRow(new Object[]{files, misclassified, type, size});
         }
 
         return tb;
@@ -62,19 +62,25 @@ public class TableHelper {
         JScrollPane scrollPane = new JScrollPane();
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setShowGrid(false);
-        table.setAutoCreateRowSorter(true);
         ((DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer())
                 .setHorizontalAlignment(JLabel.LEFT);
         scrollPane.setViewportView(table);
         model.setColumnIdentifiers(HEADER);
+        table.setAutoCreateRowSorter(true);
         table.setDefaultEditor(Object.class, null);
         table.setModel(model);
+
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
-                JLabel label = (JLabel) table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0);
-                String name = label.getText();
-                String newDir = String.format("%s%s\\", dir, name);
-
+                File file_1 = (File) table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0);
+                String name = file_1.getName();
+                String newDir;
+                if ( !file_1.isDirectory() )
+                {
+                    newDir = dir;
+                }
+                else
+                    newDir = String.format("%s%s\\", dir, name);
                 if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     File file = new File(newDir);
                     if (file.isDirectory()) {
@@ -115,29 +121,21 @@ public class TableHelper {
         void onTableFileClicked(String newDir);
     }
 
-    private class Renderer extends DefaultTableCellRenderer {
+    private static class Renderer extends DefaultTableCellRenderer {
         private final FileSystemView fileSystemView;
-        private final JLabel label;
-
         private Renderer() {
-            label = new JLabel();
             fileSystemView = FileSystemView.getFileSystemView();
         }
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-            File folder = new File(dir);
-
-            File[] files = folder.listFiles();
-            if (files[row] == null) {
-                return label;
-            }
+            File file = (File)value;
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-            label.setIcon(fileSystemView.getSystemIcon(files[row]));
-            label.setText(fileSystemView.getSystemDisplayName(files[row]));
-            label.setBackground(new Color(70, 73, 75));
+            label.setIcon(fileSystemView.getSystemIcon(file));
+            label.setText(fileSystemView.getSystemDisplayName(file));
             return label;
         }
+
+
     }
 }
