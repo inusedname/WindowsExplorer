@@ -1,5 +1,7 @@
 package controller.table;
 
+import interfaces.FileManipulationDialogCallback;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -13,14 +15,16 @@ import java.text.SimpleDateFormat;
 public class TableHelper {
 
     private final JTable table;
-    private final TableHelper.TableCallbacks callbacks;
+    private final TableHelper.TableCallbacks tableCallback;
+    private final FileManipulationDialogCallback fileManipulationDialogCallback;
     private final String[] HEADER = new String[]{"Name", "Date modified", "Type", "Size"};
     public DefaultTableModel model = new DefaultTableModel();
     private String dir = "";
 
-    public TableHelper(JTable table, TableCallbacks callbacks) {
+    public TableHelper(JTable table, TableCallbacks tableCallbacks, FileManipulationDialogCallback dialogCallback) {
         this.table = table;
-        this.callbacks = callbacks;
+        this.tableCallback = tableCallbacks;
+        this.fileManipulationDialogCallback = dialogCallback;
     }
 
     private DefaultTableModel createTableData(String folder) {
@@ -44,7 +48,7 @@ public class TableHelper {
                 type = "." + name.substring(name.lastIndexOf(".") + 1);
                 long fileSizeInBytes = files.length();
                 long fileSizeInKB = fileSizeInBytes / 1024;
-                size = "" + fileSizeInKB + " kb";
+                size = "" + fileSizeInKB + " KB";
             }
             if (files.isDirectory()) {
                 type = "Folder";
@@ -60,6 +64,9 @@ public class TableHelper {
     public void initTable() {
 
         JScrollPane scrollPane = new JScrollPane();
+        table.setShowHorizontalLines(false);
+        table.setShowVerticalLines(false);
+        table.setFillsViewportHeight(true);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         table.setShowGrid(false);
         ((DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer())
@@ -72,25 +79,24 @@ public class TableHelper {
 
         table.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent mouseEvent) {
-                File file_1 = (File) table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0);
-                String name = file_1.getName();
                 String newDir;
-                if ( !file_1.isDirectory() )
-                {
+                if (table.getSelectedRow() != -1) {
+                    String name = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
+                    newDir = String.format("%s%s\\", dir, name);
+                }
+                else {
                     newDir = dir;
                 }
-                else
-                    newDir = String.format("%s%s\\", dir, name);
                 if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     File file = new File(newDir);
                     if (file.isDirectory()) {
-                        callbacks.onTableFolderClicked(newDir);
+                        tableCallback.onTableFolderClicked(newDir);
                     } else {
-                        callbacks.onTableFileClicked(newDir);
+                        tableCallback.onTableFileClicked(newDir);
                     }
                 }
-                if (mouseEvent.getButton() == MouseEvent.BUTTON3 && table.getSelectedRow() != -1) {
-                    PopupMenu menu = new TableRowPopupMenu(newDir);
+                if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
+                    PopupMenu menu = new TableRowPopupMenu(newDir, fileManipulationDialogCallback);
                     menu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
                 }
             }
