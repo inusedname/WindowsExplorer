@@ -81,10 +81,9 @@ public class TableHelper {
             public void mousePressed(MouseEvent mouseEvent) {
                 String newDir;
                 if (table.getSelectedRow() != -1) {
-                    String name = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
-                    newDir = String.format("%s%s\\", dir, name);
-                }
-                else {
+                    String path = String.valueOf(table.getValueAt(table.rowAtPoint(mouseEvent.getPoint()), 0));
+                    newDir = String.format("%s\\", path);
+                } else {
                     newDir = dir;
                 }
                 if (mouseEvent.getButton() == MouseEvent.BUTTON1 && mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
@@ -124,17 +123,20 @@ public class TableHelper {
 
     public interface TableCallbacks {
         void onTableFolderClicked(String newDir);
+
         void onTableFileClicked(String newDir);
     }
 
     private static class Renderer extends DefaultTableCellRenderer {
         private final FileSystemView fileSystemView;
+
         private Renderer() {
             fileSystemView = FileSystemView.getFileSystemView();
         }
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            File file = (File)value;
+            File file = (File) value;
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
             label.setIcon(fileSystemView.getSystemIcon(file));
